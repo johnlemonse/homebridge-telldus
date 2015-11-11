@@ -1,0 +1,24 @@
+{
+  "name": "homebridge-telldus",
+  "description": "Telldus plugin for homebridge",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/github.com:johngson/homebridge-telldus.git"
+  },
+  "license": "ISC",
+  "preferGlobal": true,
+  "keywords": [
+    "homebridge-plugin",
+    "telldus",
+    "telldus-live",
+    "live"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.5"
+  },
+  "dependencies": {
+    "telldus-live": "^0.2.1"
+  }
+}
