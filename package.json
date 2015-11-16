@@ -4,15 +4,17 @@
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git://github.com/github.com:johngson/homebridge-telldus.git"
+    "url": "git://github.com/johngson/homebridge-telldus"
   },
   "license": "ISC",
   "preferGlobal": true,
   "keywords": [
     "homebridge-plugin",
+    "homebridge",
     "telldus",
     "telldus-live",
-    "live"
+    "live",
+    "homekit"
   ],
   "engines": {
     "node": ">=0.12.0",

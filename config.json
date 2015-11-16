@@ -19,7 +19,6 @@
             "private_key" : "telldus private key",
             "token" : "telldus token",
             "token_secret" : "telldus token secret"
-        },
         }
     ]
 }
