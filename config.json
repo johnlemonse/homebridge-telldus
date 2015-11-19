@@ -13,12 +13,18 @@
 
     "platforms": [
         {
-            "platform" : "Telldus",
-            "name" : "Telldus Liv!e",
-            "public_key" : "telldus public key",
-            "private_key" : "telldus private key",
-            "token" : "telldus token",
-            "token_secret" : "telldus token secret"
+            "platform": "Telldus",
+            "name": "Telldus Liv!e",
+            "public_key": "telldus public key",
+            "private_key": "telldus private key",
+            "token": "telldus token",
+            "token_secret": "telldus token secret",
+            "unknown_accessories": [
+                {
+                    "id": (integer) id #,
+                    "model": "model-type"
+                }
+            ]
         }
     ]
 }
