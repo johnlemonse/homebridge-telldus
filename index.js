@@ -281,7 +281,6 @@ function isDefinedAsUnknownAccessory(deviceId) {
 function getDefinedUnknownAccessory(deviceId) {
     for (var i = 0; i < UnknowAccessories.length; i++) {
         if (UnknowAccessories[i]["id"] == deviceId) {
-            console.log("ABC: %j", UnknowAccessories[i]);
             return UnknowAccessories[i];
         }
     }
