@@ -63,7 +63,7 @@ function TelldusAccessory(log, device) {
     this.manufacturer = m[1];
 
     // Check if device is defined as unknown accessory
-    if (isDefinedAsUnknownAccessory(this.id)) {
+    if (UnknowAccessories != null && isDefinedAsUnknownAccessory(this.id)) {
         this.model = getDefinedUnknownAccessory(this.id)["model"];
     }
 
