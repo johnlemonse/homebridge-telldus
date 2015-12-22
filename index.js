@@ -155,7 +155,7 @@ TelldusAccessory.prototype = {
 
             switch (characteristic) {
                 case Characteristic.Formats.BOOL:
-                    newState = that.device.state;
+                    newState = that.device.state == 1 ? 1 : 0;
                     break;
 
                 case Characteristic.Formats.INT:
