@@ -165,7 +165,7 @@ TelldusAccessory.prototype = {
             }
 
             that.log("Updated state " + characteristic + " : " + newState);
-            callback(newState);
+            callback(false, newState);
         })
     },
 
