@@ -176,7 +176,7 @@ TelldusAccessory.prototype = {
 
 
         switch (characteristic) {
-            case Characteristic.Formats.INT:
+            case Characteristic.Formats.BOOL:
                 TelldusLive.onOffDevice(that.device, newValue, function (err, result) {
                     if (!!err) callback(err, null);
                     callback(null, newValue);
