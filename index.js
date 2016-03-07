@@ -201,6 +201,7 @@ TelldusDevice.prototype = {
 			var cx = service.getCharacteristic(characteristics[i]);
 			if (cx instanceof Characteristic.ContactSensorState) {
 				cx.getValueFromDev = function(dev) {
+					console.log(dev);
 					return (dev.value == 1 ? 1 : 0);
 				};
 				cx.on('get', function(callback, context) {
