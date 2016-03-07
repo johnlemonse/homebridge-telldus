@@ -244,7 +244,7 @@ TelldusDevice.prototype = {
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
 					console.log("State: " + dev.state);
-					return dev.state !== '2';
+					return dev.state != 2;
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
@@ -262,12 +262,12 @@ TelldusDevice.prototype = {
 			if (cx instanceof Characteristic.Brightness) {
 				cx.getValueFromDev = function(dev) {
 					console.log("State: " + dev.state);
-					console.log("State value: " + dev.statevalue);
+					console.log("State value: " + dev.stateValue);
 
-					if (dev.state === '1') {
+					if (dev.state == 1) {
 						return 100;
 					}
-					if (dev.state === '16' && dev.statevalue !== "unde") {
+					if (dev.state == 16 && dev.stateValue !== "unde") {
 						return parseInt(dev.stateValue * 100 / 255);
 					}
 					return 0;
