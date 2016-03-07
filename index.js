@@ -252,12 +252,11 @@ TelldusDevice.prototype = {
 						callback(false, cx.getValueFromDev(device));
 					});
 				}.bind(this));
-				cx.on('set', function(newValue, callback, context) {
-					TelldusLive.onOffDevice(that.device, newValue, function(err, result) {
-						if (!!err)
-							callback(err, null);
-						callback(null, newValue);
+				cx.on('set', function(powerOn, callback) {
+					TelldusLive.onOffDevice(that.device, powerOn, function(err, result) {
+						callback();
 					});
+					console.log(that.device);
 				}.bind(this));
 			}
 			if (cx instanceof Characteristic.Brightness) {
@@ -270,19 +269,18 @@ TelldusDevice.prototype = {
 					}
 					return 0;
 				};
-				//cx.value = cx.getValueFromDev(that.device);
+				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, device) {
 						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
 						callback(false, cx.getValueFromDev(device));
 					});
 				}.bind(this));
-				cx.on('set', function(newValue, callback, context) {
-					TelldusLive.dimDevice(that.device, that.percentageToBits(newValue), function(err, result) {
-						if (!!err)
-							callback(err, null);
-						callback(null, that.bitsToPercentage(newValue));
+				cx.on('set', function(level, callback) {
+					TelldusLive.dimDevice(that.device, that.percentageToBits(level), function(err, result) {
+						callback();
 					});
+					console.log(that.device);
 				}.bind(this));
 			}
 		}
