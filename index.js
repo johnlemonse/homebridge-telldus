@@ -228,7 +228,6 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.CurrentRelativeHumidity) {
 				cx.getValueFromDev = function(dev) {
-					console.log(cx.props.format);
 					return parseFloat(dev.data[1].value);
 				};
 				cx.on('get', function(callback, context) {
@@ -244,12 +243,12 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
-					console.log(cx.props.format);
 					return dev.state != 2;
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						console.log(cx.props.format);
 						that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 						callback(false, cx.getValueFromDev(cdevice));
 					});
