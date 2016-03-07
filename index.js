@@ -243,9 +243,6 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
-					return dev.state != 2;
-				};
-				cx.getStateValueFromDev = function(dev) {
 					if (dev.state == 1) {
 						return 100;
 					}
@@ -260,12 +257,12 @@ TelldusDevice.prototype = {
 						console.log(cx.props.format);
 						switch(cx.props.format){
 						case Characteristic.Formats.INT:
-							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getStateValueFromDev(cdevice)>0 ? "on" : "off") + "]");
-							callback(false, cx.getStateValueFromDev(cdevice));
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice)>0 ? "on" : "off") + "]");
+							callback(false, cx.getValueFromDev(cdevice));
 							break;
 						case Characteristic.Formats.BOOL:
-							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
-							callback(false, cx.getValueFromDev(cdevice));
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice)>0 ? "on" : "off") + "]");
+							callback(false, (cx.getValueFromDev(cdevice)>0));
 							break;
 						}
 					});
