@@ -3,8 +3,7 @@ var TellduAPI = require("telldus-live");
 module.exports = function(homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
-	homebridge.registerPlatform("homebridge-telldus", "Telldus",
-			TelldusPlatform);
+	homebridge.registerPlatform("homebridge-telldus", "Telldus", TelldusPlatform);
 };
 
 function TelldusPlatform(log, config) {
@@ -59,8 +58,7 @@ TelldusPlatform.prototype = {
 				that.log("Adding " + accessories.length + " " + type);
 				foundAccessories = foundAccessories.concat(accessories);
 				if (++noAccessoryTypes == 2) {
-					that.log("Loading " + foundAccessories.length
-							+ " accessories");
+					that.log("Loading " + foundAccessories.length + " accessories");
 					callback(foundAccessories);
 				}
 			});
@@ -112,8 +110,7 @@ TelldusPlatform.prototype = {
 			for (var i = 0; i < devices.length; i++) {
 				TelldusLive.getDeviceInfo(devices[i], function(err, device) {
 					if (!!err)
-						throw "Error while fetching device info, "
-								+ err.message;
+						throw "Error while fetching device info, " + err.message;
 
 					var accessory = new TelldusDevice(that.log, device);
 					foundAccessories.push(accessory);
@@ -160,9 +157,7 @@ TelldusDevice.prototype = {
 		// Accessory information
 		var accessoryInformation = new Service.AccessoryInformation();
 
-		accessoryInformation.setCharacteristic(Characteristic.Manufacturer,
-				this.manufacturer).setCharacteristic(Characteristic.Model,
-				this.model).setCharacteristic(Characteristic.SerialNumber,
+		accessoryInformation.setCharacteristic(Characteristic.Manufacturer, this.manufacturer).setCharacteristic(Characteristic.Model, this.model).setCharacteristic(Characteristic.SerialNumber,
 				this.id);
 
 		services.push(accessoryInformation);
@@ -179,35 +174,23 @@ TelldusDevice.prototype = {
 		switch (this.model) {
 		case "selflearning-switch":
 			if (this.manufacturer.indexOf("magnet") > -1) {
-				callback(this.configureServiceCharacteristics(
-						new Service.ContactSensor(),
-						[ Characteristic.ContactSensorState ]));
+				callback(this.configureServiceCharacteristics(new Service.ContactSensor(), [ Characteristic.ContactSensorState ]));
 			} else {
-				callback(this.configureServiceCharacteristics(
-						new Service.Lightbulb(), [ Characteristic.On ]));
+				callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On ]));
 			}
 			break;
 		case "codeswitch":
-			callback(this.configureServiceCharacteristics(
-					new Service.Lightbulb(), [ Characteristic.On ]));
+			callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On ]));
 			break;
 		case "selflearning-dimmer":
-			callback(this.configureServiceCharacteristics(
-					new Service.Lightbulb(), [ Characteristic.On,
-							Characteristic.Brightness ]));
+			callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On, Characteristic.Brightness ]));
 			break;
 		case "temperature":
-			callback(this.configureServiceCharacteristics(
-					new Service.TemperatureSensor(),
-					[ Characteristic.CurrentTemperature ]));
+			callback(this.configureServiceCharacteristics(new Service.TemperatureSensor(), [ Characteristic.CurrentTemperature ]));
 			break;
 		case "temperaturehumidity":
-			callback(this.configureServiceCharacteristics(
-					new Service.TemperatureSensor(),
-					[ Characteristic.CurrentTemperature ]));
-			callback(this.configureServiceCharacteristics(
-					new Service.HumiditySensor(),
-					[ Characteristic.CurrentRelativeHumidity ]));
+			callback(this.configureServiceCharacteristics(new Service.TemperatureSensor(), [ Characteristic.CurrentTemperature ]));
+			callback(this.configureServiceCharacteristics(new Service.HumiditySensor(), [ Characteristic.CurrentRelativeHumidity ]));
 			break;
 		}
 	},
@@ -220,28 +203,12 @@ TelldusDevice.prototype = {
 				cx.getValueFromDev = function(dev) {
 					return (dev.value == 1 ? 1 : 0);
 				};
-				cx
-						.on(
-								'get',
-								function(callback, context) {
-									TelldusLive
-											.getDeviceInfo(
-													that.device,
-													function(err, device) {
-														that
-																.log("Getting state for switch "
-																		+ device.name
-																		+ " ["
-																		+ (cx
-																				.getValueFromDev(device) == 1 ? "closed"
-																				: "open")
-																		+ "]");
-														callback(
-																false,
-																cx
-																		.getValueFromDev(device));
-													});
-								}.bind(this));
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, device) {
+						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) == 1 ? "closed" : "open") + "]");
+						callback(false, cx.getValueFromDev(device));
+					});
+				}.bind(this));
 			}
 
 			if (cx instanceof Characteristic.CurrentTemperature) {
@@ -249,13 +216,10 @@ TelldusDevice.prototype = {
 					return parseFloat(dev.data[0].value);
 				};
 				cx.on('get', function(callback, context) {
-					TelldusLive.getSensorInfo(that.device,
-							function(err, device) {
-								that.log("Getting temp for sensor "
-										+ device.name + " ["
-										+ cx.getValueFromDev(device) + "]");
-								callback(false, cx.getValueFromDev(device));
-							});
+					TelldusLive.getSensorInfo(that.device, function(err, device) {
+						that.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
+						callback(false, cx.getValueFromDev(device));
+					});
 				}.bind(this));
 				cx.setProps({
 					minValue : -40,
@@ -267,13 +231,10 @@ TelldusDevice.prototype = {
 					return parseFloat(dev.data[1].value);
 				};
 				cx.on('get', function(callback, context) {
-					TelldusLive.getSensorInfo(that.device,
-							function(err, device) {
-								that.log("Getting humidity for sensor "
-										+ device.name + " ["
-										+ cx.getValueFromDev(device) + "]");
-								callback(false, cx.getValueFromDev(device));
-							});
+					TelldusLive.getSensorInfo(that.device, function(err, device) {
+						that.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
+						callback(false, cx.getValueFromDev(device));
+					});
 				}.bind(this));
 				cx.setProps({
 					minValue : 0,
@@ -286,19 +247,13 @@ TelldusDevice.prototype = {
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device,
-							function(err, device) {
-								that.log("Getting state for switch "
-										+ device.name
-										+ " ["
-										+ (cx.getValueFromDev(device) ? "on"
-												: "off") + "]");
-								callback(false, cx.getValueFromDev(device));
-							});
+					TelldusLive.getDeviceInfo(that.device, function(err, device) {
+						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) ? "on" : "off") + "]");
+						callback(false, cx.getValueFromDev(device));
+					});
 				});
 				cx.on('set', function(newValue, callback, context) {
-					TelldusLive.onOffDevice(that.device, newValue, function(
-							err, result) {
+					TelldusLive.onOffDevice(that.device, newValue, function(err, result) {
 						if (!!err)
 							callback(err, null);
 						callback(null, newValue);
@@ -315,19 +270,15 @@ TelldusDevice.prototype = {
 					}
 					return 0;
 				};
-				cx.stateValue = cx.getValueFromDev(that.device);
+				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device,
-							function(err, device) {
-								that.log("Getting value for dimmer "
-										+ device.name + " ["
-										+ cx.getValueFromDev(device) + "]");
-								callback(false, cx.getValueFromDev(device));
-							});
+					TelldusLive.getDeviceInfo(that.device, function(err, device) {
+						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
+						callback(false, cx.getValueFromDev(device));
+					});
 				});
 				cx.on('set', function(newValue, callback, context) {
-					TelldusLive.dimDevice(that.device, that
-							.percentageToBits(newValue), function(err, result) {
+					TelldusLive.dimDevice(that.device, that.percentageToBits(newValue), function(err, result) {
 						if (!!err)
 							callback(err, null);
 						callback(null, that.bitsToPercentage(newValue));
