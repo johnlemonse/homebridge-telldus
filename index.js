@@ -31,8 +31,6 @@ function TelldusDevice(log, device) {
 	var m = device.model ? device.model.split(':') : [ 'unknown', 'unknown' ];
 	this.model = m[0];
 	this.manufacturer = m[1];
-	this.state = device.state;
-	this.stateValue = device.stateValue;
 
 	// Device log
 	this.log = function(string) {
@@ -245,8 +243,8 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
-					console.log("State: " + dev.state);
-					return dev.state != 2;
+					console.log(dev);
+					return dev.state == 1 || dev.state == 16;
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
@@ -263,8 +261,7 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.Brightness) {
 				cx.getValueFromDev = function(dev) {
-					console.log("State: " + dev.state);
-					console.log("State value: " + dev.stateValue);
+					console.log(dev);
 
 					if (dev.state == 1) {
 						return 100;
