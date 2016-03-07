@@ -31,6 +31,8 @@ function TelldusDevice(log, device) {
 	var m = device.model ? device.model.split(':') : [ 'unknown', 'unknown' ];
 	this.model = m[0];
 	this.manufacturer = m[1];
+	this.state = device.state;
+	this.stateValue = device.stateValue;
 
 	// Device log
 	this.log = function(string) {
