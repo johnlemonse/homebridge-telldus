@@ -205,9 +205,9 @@ TelldusDevice.prototype = {
 					return (dev.value == 2 ? 1 : 0);
 				};
 				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device, function(err, device) {
-						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) == 1 ? "closed" : "open") + "]");
-						callback(false, cx.getValueFromDev(device));
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
 					});
 				}.bind(this));
 			}
