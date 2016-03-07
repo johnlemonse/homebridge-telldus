@@ -246,12 +246,12 @@ TelldusDevice.prototype = {
 					console.log(dev);
 
 					if (dev.state == 1) {
-						return 100;
+						return true;
 					}
 					if (dev.state == 16 && dev.statevalue !== "unde") {
 						return parseInt(dev.statevalue * 100 / 255);
 					}
-					return 0;
+					return false;
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
