@@ -248,9 +248,9 @@ TelldusDevice.prototype = {
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device, function(err, device) {
-						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) ? "on" : "off") + "]");
-						callback(false, cx.getValueFromDev(device));
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
 					});
 				}.bind(this));
 				cx.on('set', function(powerOn, callback) {
@@ -262,21 +262,21 @@ TelldusDevice.prototype = {
 			if (cx instanceof Characteristic.Brightness) {
 				cx.getValueFromDev = function(dev) {
 					console.log("State: " + dev.state);
-					console.log("State value: " + dev.stateValue);
+					console.log("State value: " + dev.statevalue);
 
 					if (dev.state === '1') {
 						return 100;
 					}
-					if (dev.state === '16' && dev.stateValue !== "unde") {
+					if (dev.state === '16' && dev.statevalue !== "unde") {
 						return parseInt(dev.stateValue * 100 / 255);
 					}
 					return 0;
 				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device, function(err, device) {
-						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
-						callback(false, cx.getValueFromDev(device));
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
+						callback(false, cx.getValueFromDev(cdevice));
 					});
 				}.bind(this));
 				cx.on('set', function(level, callback) {
