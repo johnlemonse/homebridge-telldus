@@ -244,9 +244,9 @@ TelldusDevice.prototype = {
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
 					console.log(dev);
-					return dev.state != '2';
+					return dev.state !== '2';
 				};
-				cx.value = cx.getValueFromDev(that.device);
+//				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, device) {
 						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) ? "on" : "off") + "]");
@@ -263,15 +263,15 @@ TelldusDevice.prototype = {
 				cx.getValueFromDev = function(dev) {
 					console.log(dev);
 
-					if (dev.state == '1') {
+					if (dev.state === '1') {
 						return 100;
 					}
-					if (dev.state == '16' && dev.stateValue != "unde") {
+					if (dev.state === '16' && dev.stateValue !== "unde") {
 						return parseInt(dev.stateValue * 100 / 255);
 					}
 					return 0;
 				};
-				cx.value = cx.getValueFromDev(that.device);
+//				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, device) {
 						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
