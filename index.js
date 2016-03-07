@@ -270,7 +270,7 @@ TelldusDevice.prototype = {
 					}
 					return 0;
 				};
-				cx.value = cx.getValueFromDev(that.device);
+				//cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, device) {
 						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
