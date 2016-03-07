@@ -228,6 +228,7 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.CurrentRelativeHumidity) {
 				cx.getValueFromDev = function(dev) {
+					console.log(cx.props.format);
 					return parseFloat(dev.data[1].value);
 				};
 				cx.on('get', function(callback, context) {
