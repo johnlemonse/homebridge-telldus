@@ -39,7 +39,7 @@ function TelldusDevice(log, device) {
 	};
 }
 
-elldusPlatform.prototype = {
+TelldusPlatform.prototype = {
 
 	accessories : function(callback) {
 		var that = this;
@@ -127,6 +127,7 @@ elldusPlatform.prototype = {
 		});
 	}
 };
+
 TelldusDevice.prototype = {
 
 	// Convert 0-255 to 0-100
