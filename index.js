@@ -99,10 +99,9 @@ TelldusPlatform.prototype = {
 			that.log("Found " + devices.length + " devices.");
 
 			// Only supporting type 'device'
-			for (var a = 0; a < devices.length; a++) {
-				console.log(devices[a]);
-				if (devices[a].type != 'device') {
-					devices.splice(a, 1);
+			for(var i = array.length - 1; i >= 0; i--) {
+				if (devices[i].type != 'device') {
+					devices.splice(i, 1);
 				}
 			}
 
