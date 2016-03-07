@@ -251,7 +251,7 @@ TelldusDevice.prototype = {
 					}
 					return 0;
 				};
-				cx.value = cx.getValueFromDev(that.device);
+				cx.value = cx.getValueFromDev(that.device)>0;
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
 						console.log(cx.props.format);
