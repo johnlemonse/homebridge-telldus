@@ -243,6 +243,7 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
+					console.log(cx.props.format);
 					return dev.state != 2;
 				};
 				cx.value = cx.getValueFromDev(that.device);
