@@ -251,14 +251,14 @@ TelldusDevice.prototype = {
 						that.log("Getting state for switch " + device.name + " [" + (cx.getValueFromDev(device) ? "on" : "off") + "]");
 						callback(false, cx.getValueFromDev(device));
 					});
-				});
+				}.bind(this));
 				cx.on('set', function(newValue, callback, context) {
 					TelldusLive.onOffDevice(that.device, newValue, function(err, result) {
 						if (!!err)
 							callback(err, null);
 						callback(null, newValue);
 					});
-				});
+				}.bind(this));
 			}
 			if (cx instanceof Characteristic.Brightness) {
 				cx.getValueFromDev = function(dev) {
@@ -276,14 +276,14 @@ TelldusDevice.prototype = {
 						that.log("Getting value for dimmer " + device.name + " [" + cx.getValueFromDev(device) + "]");
 						callback(false, cx.getValueFromDev(device));
 					});
-				});
+				}.bind(this));
 				cx.on('set', function(newValue, callback, context) {
 					TelldusLive.dimDevice(that.device, that.percentageToBits(newValue), function(err, result) {
 						if (!!err)
 							callback(err, null);
 						callback(null, that.bitsToPercentage(newValue));
 					});
-				});
+				}.bind(this));
 			}
 		}
 		return service;
