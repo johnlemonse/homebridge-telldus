@@ -243,26 +243,20 @@ TelldusDevice.prototype = {
 			}
 			if (cx instanceof Characteristic.On) {
 				cx.getValueFromDev = function(dev) {
-					if (dev.state == 1) {
-						return 100;
-					}
-					if (dev.state == 16 && dev.statevalue !== "unde") {
-						return parseInt(dev.statevalue * 100 / 255);
-					}
-					return 0;
+					return dev.state !=2;
 				};
-				cx.value = cx.getValueFromDev(that.device)>0;
+				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
 						console.log(cx.props.format);
 						switch(cx.props.format){
 						case Characteristic.Formats.INT:
-							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice)>0 ? "on" : "off") + "]");
-							callback(false, cx.getValueFromDev(cdevice));
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
+							callback(false, (cx.getValueFromDev(cdevice)?1:0));
 							break;
 						case Characteristic.Formats.BOOL:
-							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice)>0 ? "on" : "off") + "]");
-							callback(false, (cx.getValueFromDev(cdevice)>0));
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
+							callback(false, (cx.getValueFromDev(cdevice)));
 							break;
 						}
 					});
