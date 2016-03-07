@@ -100,6 +100,7 @@ TelldusPlatform.prototype = {
 
 			// Only supporting type 'device'
 			for (var a = 0; a < devices.length; a++) {
+				console.log(devices[a]);
 				if (devices[a].type != 'device') {
 					devices.splice(a, 1);
 				}
