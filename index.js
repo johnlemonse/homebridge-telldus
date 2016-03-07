@@ -260,7 +260,7 @@ TelldusDevice.prototype = {
 						console.log(cx.props.format);
 						switch(cx.props.format){
 						case Characteristic.Formats.INT:
-							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getStateValueFromDev(cdevice) ? "on" : "off") + "]");
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getStateValueFromDev(cdevice)>0 ? "on" : "off") + "]");
 							callback(false, cx.getStateValueFromDev(cdevice));
 							break;
 						case Characteristic.Formats.BOOL:
