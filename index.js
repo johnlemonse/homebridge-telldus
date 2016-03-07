@@ -245,12 +245,29 @@ TelldusDevice.prototype = {
 				cx.getValueFromDev = function(dev) {
 					return dev.state != 2;
 				};
+				cx.getStateValueFromDev = function(dev) {
+					if (dev.state == 1) {
+						return 100;
+					}
+					if (dev.state == 16 && dev.statevalue !== "unde") {
+						return parseInt(dev.statevalue * 100 / 255);
+					}
+					return 0;
+				};
 				cx.value = cx.getValueFromDev(that.device);
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
 						console.log(cx.props.format);
-						that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
-						callback(false, cx.getValueFromDev(cdevice));
+						switch(cx.props.format){
+						case Characteristic.Formats.INT:
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getStateValueFromDev(cdevice) ? "on" : "off") + "]");
+							callback(false, cx.getStateValueFromDev(cdevice));
+							break;
+						case Characteristic.Formats.BOOL:
+							that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
+							callback(false, cx.getValueFromDev(cdevice));
+							break;
+						}
 					});
 				}.bind(this));
 				cx.on('set', function(powerOn, callback) {
