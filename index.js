@@ -159,7 +159,7 @@ TelldusAccessory.prototype = {
                     break;
 
                 case Characteristic.Formats.INT:
-                    newState = that.bitsToPercentage(that.device.state);
+                    newState = that.bitsToPercentage(that.device.statevalue);
                     break;
 
             }
