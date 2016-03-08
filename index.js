@@ -175,6 +175,8 @@ TelldusDevice.prototype = {
 		case "selflearning-switch":
 			if (this.manufacturer.indexOf("magnet") > -1) {
 				callback(this.configureServiceCharacteristics(new Service.ContactSensor(), [ Characteristic.ContactSensorState ]));
+			} else if(this.name == "Skalskydd"){
+				callback(this.configureServiceCharacteristics(new Service.SecuritySystem(), [ Characteristic.SecuritySystemCurrentState, Characteristic.SecuritySystemTargetState ]));
 			} else {
 				callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On ]));
 			}
@@ -199,6 +201,40 @@ TelldusDevice.prototype = {
 
 		for (var i = 0; i < characteristics.length; i++) {
 			var cx = service.getCharacteristic(characteristics[i]);
+			if (cx instanceof Characteristic.SecuritySystemCurrentState) {
+				cx.getValueFromDev = function(dev) {
+					return (dev.state == 1 ? 0 : 3);
+				};
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
+					});
+				}.bind(this));
+				cx.on('set', function(state, callback) {
+					TelldusLive.onOffDevice(that.device, state!=3, function(err, result) {
+						callback();
+					});
+				}.bind(this));
+			}
+
+			if (cx instanceof Characteristic.SecuritySystemTargetState) {
+				cx.getValueFromDev = function(dev) {
+					return (dev.state == 1 ? 0 : 3);
+				};
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting target state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarm" : "arm") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
+					});
+				}.bind(this));
+				cx.on('set', function(state, callback) {
+					TelldusLive.onOffDevice(that.device, state!=3, function(err, result) {
+						callback();
+					});
+				}.bind(this));
+			}
+
 			if (cx instanceof Characteristic.ContactSensorState) {
 				cx.getValueFromDev = function(dev) {
 					return (dev.state == 1 ? 1 : 0);
