@@ -203,7 +203,13 @@ TelldusDevice.prototype = {
 			var cx = service.getCharacteristic(characteristics[i]);
 			if (cx instanceof Characteristic.SecuritySystemCurrentState) {
 				cx.getValueFromDev = function(dev) {
-					return (dev.state == 1 ? 0 : 3);
+					if (dev.state == 2) {
+						return 3;
+					}
+					if (dev.state == 1 && dev.statevalue !== "unde") {
+						return parseInt(dev.statevalue);
+					}
+					return 3;
 				};
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
@@ -211,25 +217,16 @@ TelldusDevice.prototype = {
 						callback(false, cx.getValueFromDev(cdevice));
 					});
 				}.bind(this));
-				cx.on('set', function(state, callback) {
-					TelldusLive.onOffDevice(that.device, state!=3, function(err, result) {
-						callback();
-					});
-				}.bind(this));
+//				cx.on('set', function(state, callback) {
+//					TelldusLive.onOffDevice(that.device, state!=3, function(err, result) {
+//						callback();
+//					});
+//				}.bind(this));
 			}
 
 			if (cx instanceof Characteristic.SecuritySystemTargetState) {
-				cx.getValueFromDev = function(dev) {
-					return (dev.state == 1 ? 0 : 3);
-				};
-				cx.on('get', function(callback, context) {
-					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
-						that.log("Getting target state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarm" : "arm") + "]");
-						callback(false, cx.getValueFromDev(cdevice));
-					});
-				}.bind(this));
 				cx.on('set', function(state, callback) {
-					TelldusLive.onOffDevice(that.device, state!=3, function(err, result) {
+					TelldusLive.dimDevice(that.device, state, function(err, result) {
 						callback();
 					});
 				}.bind(this));
