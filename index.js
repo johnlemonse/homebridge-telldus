@@ -192,6 +192,9 @@ TelldusDevice.prototype = {
 		case "temperature":
 			callback(this.configureServiceCharacteristics(new Service.TemperatureSensor(), [ Characteristic.CurrentTemperature ]));
 			break;
+		case "EA4C": // oregon protocol temperature sensor model
+			callback(this.configureServiceCharacteristics(new Service.TemperatureSensor(), [ Characteristic.CurrentTemperature ]));
+			break;
 		case "temperaturehumidity":
 			callback(this.configureServiceCharacteristics(new Service.TemperatureSensor(), [ Characteristic.CurrentTemperature ]));
 			callback(this.configureServiceCharacteristics(new Service.HumiditySensor(), [ Characteristic.CurrentRelativeHumidity ]));
