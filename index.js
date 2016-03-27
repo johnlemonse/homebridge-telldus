@@ -174,7 +174,7 @@ TelldusDevice.prototype = {
 		switch (this.model) {
 		case "selflearning-switch":
 			if (this.manufacturer.indexOf("magnet") > -1) {
-				callback(this.configureServiceCharacteristics(new Service.ContactSensor(), [ Characteristic.ContactSensorState ]));
+				callback(this.configureServiceCharacteristics(new Service.Door(), [ Characteristic.CurrentPosition,Characteristic.PositionState,Characteristic.TargetPosition ]));
 			} else {
 				callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On ]));
 			}
@@ -256,6 +256,41 @@ TelldusDevice.prototype = {
 				cx.on('get', function(callback, context) {
 					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
 						that.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
+					});
+				}.bind(this));
+			}
+			if (cx instanceof Characteristic.CurrentPosition) {
+				cx.getValueFromDev = function(dev) {
+					return (dev.state == 1 ? 100 : 0);
+				};
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting current position for door " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 100 ? "open" : "closed") + "]");
+						callback(false, cx.getValueFromDev(cdevice));
+					});
+				}.bind(this));
+			}
+
+			if (cx instanceof Characteristic.PositionState) {
+				cx.getValueFromDev = function(dev) {
+					return 2;
+				};
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting state for door " + cdevice.name + " [stopped]");
+						callback(false, cx.getValueFromDev(cdevice));
+					});
+				}.bind(this));
+			}
+
+			if (cx instanceof Characteristic.TargetPosition) {
+				cx.getValueFromDev = function(dev) {
+					return 0;
+				};
+				cx.on('get', function(callback, context) {
+					TelldusLive.getDeviceInfo(that.device, function(err, cdevice) {
+						that.log("Getting target position for door " + cdevice.name + " [closed]");
 						callback(false, cx.getValueFromDev(cdevice));
 					});
 				}.bind(this));
