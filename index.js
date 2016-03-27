@@ -174,7 +174,7 @@ TelldusDevice.prototype = {
 		switch (this.model) {
 		case "selflearning-switch":
 			if (this.manufacturer.indexOf("magnet") > -1) {
-				callback(this.configureServiceCharacteristics(new Service.Door(), [ Characteristic.CurrentPosition,Characteristic.PositionState,Characteristic.TargetPosition ]));
+				callback(this.configureServiceCharacteristics(new Service.ContactSensor(), [ Characteristic.ContactSensorState ]));
 			} else {
 				callback(this.configureServiceCharacteristics(new Service.Lightbulb(), [ Characteristic.On ]));
 			}
