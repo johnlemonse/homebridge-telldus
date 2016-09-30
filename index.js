@@ -9,6 +9,7 @@ const util = require('./util');
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
 	const Characteristic = homebridge.hap.Characteristic;
+	let TelldusLive;
 
 	const modelDefinitions = [
 		{
@@ -53,8 +54,8 @@ module.exports = function(homebridge) {
 		this.tokenSecret = config["token_secret"];
 		this.unknownAccessories = config["unknown_accessories"] || [];
 
-		this.TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
-		bluebird.promisifyAll(this.TelldusLive);
+		TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
+		bluebird.promisifyAll(TelldusLive);
 	}
 
 	function TelldusDevice(log, unknownAccessories, device) {
@@ -88,7 +89,7 @@ module.exports = function(homebridge) {
 		accessories: function(callback) {
 			this.log("Loading accessories...");
 
-			this.TelldusLive.loginAsync(this.token, this.tokenSecret)
+			TelldusLive.loginAsync(this.token, this.tokenSecret)
 				.then(user => {
 					this.log("Logged in with user: " + user.email);
 					return this.getAccessories();
@@ -102,20 +103,20 @@ module.exports = function(homebridge) {
 				});
 		},
 		getAccessories: function() {
-			return this.TelldusLive.getSensorsAsync()
+			return TelldusLive.getSensorsAsync()
 				.then(sensors => {
 					this.log("Found " + sensors.length + " sensors in telldus live.");
 					return sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor));
 				})
 				.then(sensors => {
-					return this.TelldusLive.getDevicesAsync()
+					return TelldusLive.getDevicesAsync()
 						.then(devices => {
 							this.log("Found " + devices.length + " devices in telldus live.");
 
 							// Only supporting type 'device'
 							const filtered = devices.filter(s => s.type === 'device');
 
-							return bluebird.mapSeries(filtered, device => this.TelldusLive.getDeviceInfoAsync(device));
+							return bluebird.mapSeries(filtered, device => TelldusLive.getDeviceInfoAsync(device));
 						})
 						.then(devices => devices.map(device => new TelldusDevice(this.log, this.unknownAccessories, device)))
 						.then(devices => sensors.concat(devices));
@@ -172,14 +173,14 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
 
 					cx.on('set', (state, callback) => {
-						this.TelldusLive.dimDevice(this.device, state, (err, result) => {
+						TelldusLive.dimDevice(this.device, state, (err, result) => {
 							callback();
 						});
 					});
@@ -193,14 +194,14 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
 
 					cx.on('set', (state, callback) => {
-						this.TelldusLive.dimDevice(this.device, state, (err, result) => {
+						TelldusLive.dimDevice(this.device, state, (err, result) => {
 							callback();
 						});
 					});
@@ -210,7 +211,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 1 : 0;
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -220,7 +221,7 @@ module.exports = function(homebridge) {
 				if (cx instanceof Characteristic.CurrentPosition) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 100 : 0;
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting current position for door " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 100 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -231,7 +232,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => 2;
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting state for door " + cdevice.name + " [stopped]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -242,7 +243,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => 0;
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting target position for door " + cdevice.name + " [closed]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -253,7 +254,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getSensorInfo(this.device, (err, device) => {
+						TelldusLive.getSensorInfo(this.device, (err, device) => {
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
 						});
@@ -269,7 +270,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[1].value);
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getSensorInfo(this.device, (err, device) => {
+						TelldusLive.getSensorInfo(this.device, (err, device) => {
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
 						});
@@ -287,7 +288,7 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
 							switch (cx.props.format) {
@@ -302,13 +303,13 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (powerOn, callback) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
-							this.TelldusLive.onOffDevice(this.device, powerOn, (err, result) => {
+							TelldusLive.onOffDevice(this.device, powerOn, (err, result) => {
 								callback();
 							});
 						});
@@ -325,14 +326,14 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback, context) => {
-						this.TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
 
 					cx.on('set', (level, callback) => {
-						this.TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
+						TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
 							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
 							.catch(err => this.log(err))
 							.finally(() => callback());
