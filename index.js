@@ -14,30 +14,30 @@ module.exports = function(homebridge) {
 	const modelDefinitions = [
 		{
 			model: 'selflearning-switch',
-			definitions: [{ service: new Service.Lightbulb(), characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			model: 'codeswitch',
-			definitions: [{ service: new Service.Lightbulb(), characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			model: 'selflearning-dimmer',
-			definitions: [{ service: new Service.Lightbulb(), characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
 		},
 		{
 			model: 'temperature',
-			definitions: [{ service: new Service.TemperatureSensor(), characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 		// oregon protocol temperature sensor model
 		{
 			model: 'EA4C',
-			definitions: [{ service: new Service.TemperatureSensor(), characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 		{
 			model: 'temperaturehumidity',
 			definitions: [
-				{ service: new Service.TemperatureSensor(), characteristics: [ Characteristic.CurrentTemperature ] },
-				{ service: new Service.HumiditySensor(), characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		}
 	];
@@ -159,7 +159,7 @@ module.exports = function(homebridge) {
 		},
 
 		configureServiceCharacteristics: function(definition) {
-			const service = definition.service;
+			const service = new definition.service();
 			const characteristics = definition.characteristics;
 
 			characteristics.forEach(characteristic => {
