@@ -104,10 +104,13 @@ module.exports = function(homebridge) {
 		},
 		getAccessories: function() {
 			return TelldusLive.getSensorsAsync()
-				.then(sensors => {
-					this.log("Found " + sensors.length + " sensors in telldus live.");
-					return sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor));
-				})
+                .then(sensors => {
+                        this.log("Found " + sensors.length + " sensors in telldus live.");
+                        const fSensors = sensors.filter(s => s.name !== null);
+                        this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
+                        return fSensors;
+                })
+                .then(sensors => sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor)))
 				.then(sensors => {
 					return TelldusLive.getDevicesAsync()
 						.then(devices => {
