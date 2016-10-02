@@ -17,10 +17,11 @@
     "homekit"
   ],
   "engines": {
-    "node": ">=0.12.0",
+    "node": ">=4",
     "homebridge": ">=0.2.5"
   },
   "dependencies": {
+    "bluebird": "^3.4.6",
     "telldus-live": "^0.2.1"
   }
 }
