@@ -104,13 +104,13 @@ module.exports = function(homebridge) {
 		},
 		getAccessories: function() {
 			return TelldusLive.getSensorsAsync()
-                .then(sensors => {
-                        this.log("Found " + sensors.length + " sensors in telldus live.");
-                        const fSensors = sensors.filter(s => s.name !== null);
-                        this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
-                        return fSensors;
-                })
-                .then(sensors => sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor)))
+        .then(sensors => {
+          this.log("Found " + sensors.length + " sensors in telldus live.");
+          const fSensors = sensors.filter(s => s.name !== null);
+          this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
+          return fSensors;
+        })
+        .then(sensors => sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor)))
 				.then(sensors => {
 					return TelldusLive.getDevicesAsync()
 						.then(devices => {
@@ -177,6 +177,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -184,7 +185,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDevice(this.device, state, (err, result) => {
-							callback();
+							callback(err);
 						});
 					});
 				}
@@ -198,6 +199,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -205,7 +207,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDevice(this.device, state, (err, result) => {
-							callback();
+							callback(err);
 						});
 					});
 				}
@@ -215,6 +217,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -225,6 +228,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 100 : 0;
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting current position for door " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 100 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -236,6 +240,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting state for door " + cdevice.name + " [stopped]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -247,6 +252,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting target position for door " + cdevice.name + " [closed]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -258,6 +264,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getSensorInfo(this.device, (err, device) => {
+							if (err) return callback(err);
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
 						});
@@ -274,6 +281,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getSensorInfo(this.device, (err, device) => {
+							if (err) return callback(err);
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
 						});
@@ -292,6 +300,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
 							switch (cx.props.format) {
@@ -307,13 +316,15 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (powerOn, callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
+
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
 							TelldusLive.onOffDevice(this.device, powerOn, (err, result) => {
-								callback();
+								callback(err);
 							});
 						});
 					});
@@ -330,6 +341,7 @@ module.exports = function(homebridge) {
 
 					cx.on('get', (callback, context) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+							if (err) return callback(err);
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
@@ -338,8 +350,7 @@ module.exports = function(homebridge) {
 					cx.on('set', (level, callback) => {
 						TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
 							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
-							.catch(err => this.log(err))
-							.finally(() => callback());
+							.then(() => callback(), err => callback(err));
 					});
 				}
 			});
