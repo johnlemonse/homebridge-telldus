@@ -75,9 +75,8 @@ module.exports = function(homebridge) {
 		else {
 			// Split manufacturer and model
 			const modelSplit = (device.model || '').split(':');
-			const m = modelSplit.length === 2 ? modelSplit: [ 'unknown', 'unknown' ];
-			this.model = m[0];
-			this.manufacturer = m[1];
+			this.model = modelSplit[0] || 'unknown';
+			this.manufacturer = modelSplit[1] || 'unknown';
 		}
 
 		// Device log
