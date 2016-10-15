@@ -2,6 +2,7 @@
 
 const TellduAPI = require('telldus-live');
 const bluebird = require('bluebird');
+const debug = require('debug')('homebridge-telldus');
 
 const util = require('./util');
 
@@ -73,7 +74,7 @@ module.exports = function(homebridge) {
 		}
 		else {
 			// Split manufacturer and model
-			const modelSplit = device.model.split(':');
+			const modelSplit = (device.model || '').split(':');
 			const m = modelSplit.length === 2 ? modelSplit: [ 'unknown', 'unknown' ];
 			this.model = m[0];
 			this.manufacturer = m[1];
@@ -105,6 +106,7 @@ module.exports = function(homebridge) {
 		getAccessories: function() {
 			return TelldusLive.getSensorsAsync()
         .then(sensors => {
+					debug('getSensors response', sensors);
           this.log("Found " + sensors.length + " sensors in telldus live.");
           const fSensors = sensors.filter(s => s.name !== null);
           this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
@@ -114,6 +116,7 @@ module.exports = function(homebridge) {
 				.then(sensors => {
 					return TelldusLive.getDevicesAsync()
 						.then(devices => {
+							debug('getDevices response', devices);
 							this.log("Found " + devices.length + " devices in telldus live.");
 
 							// Only supporting type 'device'
@@ -121,7 +124,10 @@ module.exports = function(homebridge) {
 
 							return bluebird.mapSeries(filtered, device => TelldusLive.getDeviceInfoAsync(device));
 						})
-						.then(devices => devices.map(device => new TelldusDevice(this.log, this.unknownAccessories, device)))
+						.then(devices => devices.map(device => {
+							debug('getDeviceInfo response', device)
+							return new TelldusDevice(this.log, this.unknownAccessories, device);
+						}))
 						.then(devices => sensors.concat(devices));
 				});
 		}
