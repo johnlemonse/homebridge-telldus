@@ -40,7 +40,14 @@ module.exports = function(homebridge) {
 				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
 				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
-		}
+		},
+		{
+			model: '1A2D',
+			definitions: [
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+			]
+		},
 	];
 
 	homebridge.registerPlatform("homebridge-telldus", "Telldus", TelldusPlatform);
