@@ -2,6 +2,9 @@
   "name": "homebridge-telldus",
   "description": "Telldus plugin for homebridge",
   "version": "0.0.3",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/jchnlemon/homebridge-telldus"
@@ -24,5 +27,8 @@
     "bluebird": "^3.4.6",
     "debug": "^2.2.0",
     "telldus-live": "^0.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.9.0"
   }
 }
