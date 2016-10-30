@@ -1,24 +1,37 @@
 {
-    "bridge": {
-        "name": "Homebridge",
-        "username": "CC:22:3D:E3:CE:30",
-        "port": 51826,
-        "pin": "031-45-154"
-    },
-    
-    "description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+  "bridge": {
+    "name": "Homebridge",
+    "username": "CC:22:3D:E3:CE:30",
+    "port": 51826,
+    "pin": "031-45-154"
+  },
 
-    "accessories": [
-    ],
+  "description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
 
-    "platforms": [
+  "accessories": [
+  ],
+
+  "platforms": [
+    {
+      "platform" : "Telldus",
+      "name" : "Telldus Liv!e",
+      "public_key" : "telldus public key",
+      "private_key" : "telldus private key",
+      "token" : "telldus token",
+      "token_secret" : "telldus token secret",
+      "unknown_accessories": [
         {
-            "platform" : "Telldus",
-            "name" : "Telldus Liv!e",
-            "public_key" : "telldus public key",
-            "private_key" : "telldus private key",
-            "token" : "telldus token",
-            "token_secret" : "telldus token secret"
+          "id": 123,
+          "model": "selflearning-switch",
+          "manufacturer": "Nexa"
+        },
+        {
+          "id": 456,
+          "model": "temperaturehumidity",
+          "manufacturer": "Oregon",
+          "name": "My Custom Name"
         }
-    ]
+      ]
+    }
+  ]
 }
