@@ -60,7 +60,7 @@ module.exports = function(homebridge) {
 		const privateKey = config["private_key"];
 		this.token = config["token"];
 		this.tokenSecret = config["token_secret"];
-		this.unknownAccessories = config["unknown_accessories"] || [];
+		this.unknownAccessories = config["unknown_accessories"] || [];
 
 		TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
 		bluebird.promisifyAll(TelldusLive);
@@ -193,7 +193,7 @@ module.exports = function(homebridge) {
 						return 2;
 					};
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
@@ -202,7 +202,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err, result) => {
+						TelldusLive.dimDevice(this.device, state, (err) => {
 							callback(err);
 						});
 					});
@@ -215,7 +215,7 @@ module.exports = function(homebridge) {
 						return 2;
 					};
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
@@ -224,7 +224,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err, result) => {
+						TelldusLive.dimDevice(this.device, state, (err) => {
 							callback(err);
 						});
 					});
@@ -233,7 +233,7 @@ module.exports = function(homebridge) {
 				if (cx instanceof Characteristic.ContactSensorState) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 1 : 0;
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
@@ -244,7 +244,7 @@ module.exports = function(homebridge) {
 
 				if (cx instanceof Characteristic.CurrentPosition) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 100 : 0;
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current position for door " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 100 ? "open" : "closed") + "]");
@@ -254,9 +254,9 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.PositionState) {
-					cx.getValueFromDev = dev => 2;
+					cx.getValueFromDev = () => 2;
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting state for door " + cdevice.name + " [stopped]");
@@ -266,9 +266,9 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.TargetPosition) {
-					cx.getValueFromDev = dev => 0;
+					cx.getValueFromDev = () => 0;
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting target position for door " + cdevice.name + " [closed]");
@@ -280,7 +280,7 @@ module.exports = function(homebridge) {
 				if (cx instanceof Characteristic.CurrentTemperature) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getSensorInfo(this.device, (err, device) => {
 							if (err) return callback(err);
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
@@ -297,7 +297,7 @@ module.exports = function(homebridge) {
 				if (cx instanceof Characteristic.CurrentRelativeHumidity) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[1].value);
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getSensorInfo(this.device, (err, device) => {
 							if (err) return callback(err);
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
@@ -316,7 +316,7 @@ module.exports = function(homebridge) {
 
 					cx.value = cx.getValueFromDev(this.device);
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
@@ -341,7 +341,7 @@ module.exports = function(homebridge) {
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
-							TelldusLive.onOffDevice(this.device, powerOn, (err, result) => {
+							TelldusLive.onOffDevice(this.device, powerOn, (err) => {
 								callback(err);
 							});
 						});
@@ -357,7 +357,7 @@ module.exports = function(homebridge) {
 
 					cx.value = cx.getValueFromDev(this.device);
 
-					cx.on('get', (callback, context) => {
+					cx.on('get', (callback) => {
 						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
