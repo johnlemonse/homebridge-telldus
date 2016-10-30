@@ -30,6 +30,10 @@
           "model": "temperaturehumidity",
           "manufacturer": "Oregon",
           "name": "My Custom Name"
+        },
+        {
+          "id": 789,
+          "name": "Only name altered"
         }
       ]
     }
