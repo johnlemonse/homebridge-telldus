@@ -73,17 +73,23 @@ module.exports = function(homebridge) {
 
 		// Telldus api doesn't give model of some accessories,
 		// So fetch them from config file
-		const foundUnknownAccessory = unknownAccessories.find(a => a.id == device.id);
-		if (foundUnknownAccessory) {
-			log('Unknown accessory match found ' + foundUnknownAccessory.model);
-			this.model = foundUnknownAccessory.model;
-			this.manufacturer = foundUnknownAccessory.manufacturer || 'unknown';
+		// Or if we want to customize anything in the device (e.g. name)
+		const match = unknownAccessories.find(a => a.id == device.id);
+		if (match) {
+			log(`Accessory match found ${match.id} - ${match.model}`);
+			this.model = match.model;
+			this.manufacturer = match.manufacturer || 'unknown';
+
+			if (match.name) {
+				log(`Custom name found. '${match.name}' overrides '${device.name}' from telldus`);
+				this.name = match.name;
+			}
 		}
 		else {
 			// Split manufacturer and model
 			const modelSplit = (device.model || '').split(':');
 			this.model = modelSplit[0] || 'unknown';
-			this.manufacturer = modelSplit[1] || 'unknown';
+			this.manufacturer = modelSplit[1] || 'unknown';
 		}
 
 		// Device log
