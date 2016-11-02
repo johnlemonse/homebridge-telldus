@@ -125,7 +125,7 @@ module.exports = function(homebridge) {
         .then(sensors => {
 					debug('getSensors response', sensors);
           this.log("Found " + sensors.length + " sensors in telldus live.");
-          const fSensors = sensors.filter(s => s.name !== null);
+          const fSensors = sensors.filter(s => s.name);
           this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
           return fSensors;
         })
