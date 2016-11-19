@@ -185,7 +185,7 @@ module.exports = function(homebridge) {
 		},
 
 		configureServiceCharacteristics: function(definition) {
-			const service = new definition.service();
+			const service = new definition.service(this.name);
 			const characteristics = definition.characteristics;
 
 			characteristics.forEach(characteristic => {
