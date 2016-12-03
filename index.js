@@ -66,34 +66,31 @@ module.exports = function(homebridge) {
 		bluebird.promisifyAll(TelldusLive);
 	}
 
-	function TelldusDevice(log, unknownAccessories, device) {
+	function TelldusDevice(log, device, deviceConfig) {
 		this.device = device;
 		this.name = device.name;
 		this.id = device.id;
+
+		log(`Creating accessory with ID ${this.id}. Name from telldus: ${this.name}`);
 
 		// Split manufacturer and model
 		const modelSplit = (device.model || '').split(':');
 		this.model = modelSplit[0] || 'unknown';
 		this.manufacturer = modelSplit[1] || 'unknown';
 
-		// Telldus api doesn't give model of some accessories,
-		// So fetch them from config file
-		// Or if we want to customize anything in the device (e.g. name)
-		const match = unknownAccessories.find(a => a.id == device.id);
-		if (match) {
-			log(`Accessory match found ${match.id} - ${match.model}`);
-			if (match.model) {
-				log(`Custom model found. '${match.model}' overrides '${device.model}' from telldus`);
-				this.model = match.model;
+		if (deviceConfig) {
+			log(`Custom config found for ID ${deviceConfig.id}.`);
+			if (deviceConfig.model) {
+				log(`Custom model: '${deviceConfig.model}' overrides '${device.model}' from telldus`);
+				this.model = deviceConfig.model;
 			}
-			if (match.manufacturer) {
-				log(`Custom manufacturer found. '${match.manufacturer}' overrides '${device.manufacturer}' from telldus`);
-				this.manufacturer = match.manufacturer;
+			if (deviceConfig.manufacturer) {
+				log(`Custom manufacturer: '${deviceConfig.manufacturer}' overrides '${device.manufacturer}' from telldus`);
+				this.manufacturer = deviceConfig.manufacturer;
 			}
-
-			if (match.name) {
-				log(`Custom name found. '${match.name}' overrides '${device.name}' from telldus`);
-				this.name = match.name;
+			if (deviceConfig.name) {
+				log(`Custom name: '${deviceConfig.name}' overrides '${device.name}' from telldus`);
+				this.name = deviceConfig.name;
 			}
 		}
 
@@ -121,30 +118,44 @@ module.exports = function(homebridge) {
 				});
 		},
 		getAccessories: function() {
+			const createDevice = (device) => {
+				const deviceConfig = this.unknownAccessories.find(a => a.id == device.id);
+
+				if ((deviceConfig && deviceConfig.disabled)) {
+					this.log(`Device ${device.id} is disabled, ignoring`);
+					return;
+				}
+
+				if (!device.name) {
+					this.log(`Device ${device.id} has no name from telldus, ignoring`);
+					return;
+				}
+
+				return new TelldusDevice(this.log, device, deviceConfig);
+			};
+
 			return TelldusLive.getSensorsAsync()
         .then(sensors => {
 					debug('getSensors response', sensors);
-          this.log("Found " + sensors.length + " sensors in telldus live.");
-          const fSensors = sensors.filter(s => s.name);
-          this.log("Filtered out " + (sensors.length - fSensors.length) + " sensor due to empty name.");
-          return fSensors;
+          this.log(`Found ${sensors.length} sensors in telldus live.`);
+
+					return sensors.map(sensor => createDevice(sensor)).filter(sensor => sensor);
         })
-        .then(sensors => sensors.map(sensor => new TelldusDevice(this.log, this.unknownAccessories, sensor)))
 				.then(sensors => {
 					return TelldusLive.getDevicesAsync()
 						.then(devices => {
 							debug('getDevices response', devices);
-							this.log("Found " + devices.length + " devices in telldus live.");
+							this.log(`Found ${devices.length} devices in telldus live.`);
 
 							// Only supporting type 'device'
 							const filtered = devices.filter(s => s.type === 'device');
 
 							return bluebird.mapSeries(filtered, device => TelldusLive.getDeviceInfoAsync(device));
 						})
-						.then(devices => devices.map(device => {
-							debug('getDeviceInfo response', device)
-							return new TelldusDevice(this.log, this.unknownAccessories, device);
-						}))
+						.then(devices => {
+							debug('getDeviceInfo responses', devices);
+							return devices.map(device => createDevice(device)).filter(sensor => sensor);
+						})
 						.then(devices => sensors.concat(devices));
 				});
 		}
@@ -185,7 +196,7 @@ module.exports = function(homebridge) {
 		},
 
 		configureServiceCharacteristics: function(definition) {
-			const service = new definition.service();
+			const service = new definition.service(this.name);
 			const characteristics = definition.characteristics;
 
 			characteristics.forEach(characteristic => {
