@@ -30,6 +30,8 @@ For a sample homebridge config file, see [config.json](https://github.com/jchnle
 `homebridge-telldus` tries to auto-detect devices from telldus. However some devices do not have the correct type or other parameters set. You can override/set these parameters from the homebridge config file. This is what the `unknown_accessories` property in `config.json` is for.
 
 ### unknown_accessories parameters
+All these are optional, except for `id`, which is required.
+
 ```
 "id": 123,
 "model": "temperaturehumidity",
