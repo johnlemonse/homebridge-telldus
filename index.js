@@ -48,6 +48,11 @@ module.exports = function(homebridge) {
 				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		},
+		{
+			model: 'stateless-updown',
+			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
+		},
+
 	];
 
 	homebridge.registerPlatform("homebridge-telldus", "Telldus", TelldusPlatform);
@@ -258,41 +263,6 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.CurrentPosition) {
-					cx.getValueFromDev = dev => dev.state == 1 ? 100 : 0;
-					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
-							this.log("Getting current position for door " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 100 ? "open" : "closed") + "]");
-							callback(false, cx.getValueFromDev(cdevice));
-						});
-					});
-				}
-
-				if (cx instanceof Characteristic.PositionState) {
-					cx.getValueFromDev = () => 2;
-
-					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
-							this.log("Getting state for door " + cdevice.name + " [stopped]");
-							callback(false, cx.getValueFromDev(cdevice));
-						});
-					});
-				}
-
-				if (cx instanceof Characteristic.TargetPosition) {
-					cx.getValueFromDev = () => 0;
-
-					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
-							this.log("Getting target position for door " + cdevice.name + " [closed]");
-							callback(false, cx.getValueFromDev(cdevice));
-						});
-					});
-				}
-
 				if (cx instanceof Characteristic.CurrentTemperature) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
 
@@ -385,6 +355,39 @@ module.exports = function(homebridge) {
 						TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
 							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
 							.then(() => callback(), err => callback(err));
+					});
+				}
+
+				if (cx instanceof Characteristic.CurrentPosition) {
+					cx.on('get', callback => bluebird.try(() => {
+						const resp = this.cachedValue || 0;
+						this.log(`Get CurrentPosition ${resp}`);
+						return resp;
+					}).asCallback(callback));
+				}
+
+				if (cx instanceof Characteristic.PositionState) {
+					cx.on('get', callback => bluebird.try(() => {
+						this.log(`Get PositionState`);
+						return 2;
+					}).asCallback(callback));
+				}
+
+				if (cx instanceof Characteristic.TargetPosition) {
+					cx.on('get', callback => bluebird.try(() => {
+						const resp = this.cachedValue || 0;
+						this.log(`Get TargetPosition ${resp}`);
+						return resp;
+					}).asCallback(callback));
+
+					cx.on('set', (value, callback) => {
+						this.cachedValue = value;
+
+						const up = value > 0;
+						this.log(`Door ${up ? 'up' : 'down'}`);
+						TelldusLive.upDownDeviceAsync(this.device, up)
+							.then(data => debug(data))
+							.asCallback(callback);
 					});
 				}
 			});
