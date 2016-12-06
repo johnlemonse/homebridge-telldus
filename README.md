@@ -48,6 +48,6 @@ model (unknown_accessories) | Info
 `codeswitch` | ◻️ Old type fixed code switch
 `temperature`, `EA4C` | 🌡 Temperature sensor
 `temperaturehumidity`, `1A2D` | 🌡💦 Combined temperature and humidity sensor
-
+`window-covering` | 🚪↕️ Window covering
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
