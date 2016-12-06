@@ -49,7 +49,7 @@ module.exports = function(homebridge) {
 			]
 		},
 		{
-			model: 'stateless-updown',
+			model: 'window-covering',
 			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
 		},
 
