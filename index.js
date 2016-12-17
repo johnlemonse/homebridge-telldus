@@ -52,7 +52,10 @@ module.exports = function(homebridge) {
 			model: 'window-covering',
 			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
 		},
-
+		{
+			model: 'switch',
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+		},
 	];
 
 	homebridge.registerPlatform("homebridge-telldus", "Telldus", TelldusPlatform);
