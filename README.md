@@ -51,3 +51,6 @@ model (unknown_accessories) | Info
 `window-covering` | 🚪↕️ Window covering
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
+
+## Common problems
+- "Cannot add a bridged Accessory with the same UUID as another bridged Accessory" - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
