@@ -54,3 +54,9 @@ See also:
 
 ## Common problems
 - "Cannot add a bridged Accessory with the same UUID as another bridged Accessory" - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
+
+## Reprting issues
+If you are having an issue or wondering about new features, please run homebridge in debug mode and share the log in the issue.
+Run homebridge from the command line as follows:
+
+```$ DEBUG=homebridge-telldus homebridge```
