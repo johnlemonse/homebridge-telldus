@@ -53,9 +53,9 @@ See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 
 ## Common problems / FAQ
-- `Cannot add a bridged Accessory with the same UUID as another bridged Accessory` - See #41
-- `TypeError: Cannot read property 'statusCode' of undefined` - This means that you probably don't have internet connection, or Telldus Live is down. See #46
-- `Error: listen EADDRINUSE :::51826` - This means that homebridge is already running on the same address. See #48
+- `Cannot add a bridged Accessory with the same UUID as another bridged Accessory` - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
+- `TypeError: Cannot read property 'statusCode' of undefined` - This means that you probably don't have internet connection, or Telldus Live is down. See [#46](https://github.com/jchnlemon/homebridge-telldus/issues/46)
+- `Error: listen EADDRINUSE :::51826` - This means that homebridge is already running on the same address. See [#48](https://github.com/jchnlemon/homebridge-telldus/issues/48)
 
 ## Reprting issues
 If you are having an issue or wondering about new features, please run homebridge in debug mode and share the log in the issue.
