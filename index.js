@@ -85,6 +85,18 @@ module.exports = function(homebridge) {
 		const modelSplit = (device.model || '').split(':');
 		this.model = modelSplit[0] || 'unknown';
 		this.manufacturer = modelSplit[1] || 'unknown';
+		
+		//Make default assumptions on unknown devices based on number of methods
+		if (this.model == 'n/a' && device.methods == 3) {
+			// Device with three methods is likely an selflearning switch
+			log(`Assuming ' ${device.name} ' is a selflearning-switch`);
+			this.model = 'selflearning-switch'
+		}
+		if (this.model == 'n/a' && device.methods > 16) {
+			// Device with more than 16 methods is likely an selflearning dimmer
+			log(`Assuming ' ${device.name} ' is a selflearning-dimmer`);
+			this.model = 'selflearning-dimmer'
+		}
 
 		if (deviceConfig) {
 			log(`Custom config found for ID ${deviceConfig.id}.`);
