@@ -1,6 +1,10 @@
 # homebridge-telldus 💡
 Homebridge plugin for Telldus Live!
 
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/a3DabSrJLUgh3DWQzN9s8KRM/jchnlemon/homebridge-telldus'>
+  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/a3DabSrJLUgh3DWQzN9s8KRM/jchnlemon/homebridge-telldus.svg' />
+</a>
+
 Works as a bridge between Apple's HomeKit and the telldus live platform.
 
 Supports various devices that Telldus support, like wireless switches, dimmers, temperature sensors, so you can control them from your iPhone, iPad & Apple TV.
