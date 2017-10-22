@@ -14,9 +14,11 @@ Follow the instruction in [homebridge](https://www.npmjs.com/package/homebridge)
 
 This plugin is published through [npm](https://www.npmjs.com/package/homebridge-telldus) and should be installed "globally" by typing:
 
-`npm install -g homebridge-telldus`
+`npm i -g homebridge-telldus`
 
-**⚠️ Requires node v8 as of v1.0.0**
+(And if you haven't already: `npm i -g homebridge`)
+
+**⚠️ homebridge-telldus requires node v8 as of v1.0.0**
 
 For older versions of node, install an old version: `npm install -g homebridge-telldus@0`
 
@@ -111,6 +113,15 @@ See also:
 
 # Auto startup
 To auto startup `homebridge` on boot and auto-restart on crash, I recommend using [PM2](https://nodejs.org/dist/v8.7.0/node-v8.7.0-linux-x64.tar.xz). It allows auto setup of init scripts for popular operating systems.
+
+```
+npm i -g homebridge homebridge-telldus pm2
+pm2 startup
+# Follow instructions...
+pm2 start homebridge
+pm2 save
+```
+If all went good, homebridge will now run automatically on boot
 
 # Common problems / FAQ
 - `Cannot add a bridged Accessory with the same UUID as another bridged Accessory` - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
