@@ -20,7 +20,7 @@
     "homekit"
   ],
   "engines": {
-    "node": ">=4",
+    "node": ">=8",
     "homebridge": ">=0.2.5"
   },
   "dependencies": {
