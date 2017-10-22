@@ -1,8 +1,9 @@
 'use strict';
 
-const TellduAPI = require('telldus-live');
 const bluebird = require('bluebird');
 const debug = require('debug')('homebridge-telldus');
+
+const { LocalApi, LiveApi } = require('telldus-api');
 
 const util = require('./util');
 
@@ -10,7 +11,8 @@ const util = require('./util');
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
 	const Characteristic = homebridge.hap.Characteristic;
-	let TelldusLive;
+	let api;
+	let isLocal;
 
 	const modelDefinitions = [
 		{
@@ -63,15 +65,38 @@ module.exports = function(homebridge) {
 	function TelldusPlatform(log, config) {
 		this.log = log;
 
-		// The config
-		const publicKey = config["public_key"];
-		const privateKey = config["private_key"];
-		this.token = config["token"];
-		this.tokenSecret = config["token_secret"];
-		this.unknownAccessories = config["unknown_accessories"] || [];
+		isLocal = !!config.local;
 
-		TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
-		bluebird.promisifyAll(TelldusLive);
+		log(`isLocal: ${isLocal}`);
+
+		// The config
+		if (isLocal) {
+			const ipAddress = config.local.ip_address;
+			const accessToken = config.local.access_token;
+			if (!ipAddress) throw new Error('Please specify ip_address in config');
+			if (!accessToken) throw new Error('Please specify access_token in config');
+
+			api = new LocalApi({ host: ipAddress, accessToken });
+		}
+		else {
+			const key = config["public_key"];
+			const secret = config["private_key"];
+			const tokenKey = config["token"];
+			const tokenSecret = config["token_secret"];
+			if (!key) throw new Error('Please specify public_key in config');
+			if (!secret) throw new Error('Please specify private_key in config');
+			if (!tokenKey) throw new Error('Please specify token in config');
+			if (!tokenSecret) throw new Error('Please specify token_secret in config');
+
+			api = new LiveApi({
+				key,
+				secret,
+				tokenKey,
+				tokenSecret,
+			});
+		}
+
+		this.unknownAccessories = config["unknown_accessories"] || [];
 	}
 
 	function TelldusDevice(log, device, deviceConfig) {
@@ -112,11 +137,7 @@ module.exports = function(homebridge) {
 		accessories: function(callback) {
 			this.log("Loading accessories...");
 
-			TelldusLive.loginAsync(this.token, this.tokenSecret)
-				.then(user => {
-					this.log("Logged in with user: " + user.email);
-					return this.getAccessories();
-				})
+			this.getAccessories()
 				.then(accessories => {
 					callback(accessories);
 				})
@@ -127,7 +148,8 @@ module.exports = function(homebridge) {
 		},
 		getAccessories: function() {
 			const createDevice = (device) => {
-				const deviceConfig = this.unknownAccessories.find(a => a.id == device.id);
+				// If we are running against local API, ID's are different
+				const deviceConfig = this.unknownAccessories.find(a => (isLocal ? a.local_id : a.id) == device.id);
 
 				if ((deviceConfig && deviceConfig.disabled)) {
 					this.log(`Device ${device.id} is disabled, ignoring`);
@@ -142,7 +164,7 @@ module.exports = function(homebridge) {
 				return new TelldusDevice(this.log, device, deviceConfig);
 			};
 
-			return TelldusLive.getSensorsAsync()
+			return api.listSensors()
         .then(sensors => {
 					debug('getSensors response', sensors);
           this.log(`Found ${sensors.length} sensors in telldus live.`);
@@ -150,7 +172,7 @@ module.exports = function(homebridge) {
 					return sensors.map(sensor => createDevice(sensor)).filter(sensor => sensor);
         })
 				.then(sensors => {
-					return TelldusLive.getDevicesAsync()
+					return api.listDevices()
 						.then(devices => {
 							debug('getDevices response', devices);
 							this.log(`Found ${devices.length} devices in telldus live.`);
@@ -158,7 +180,7 @@ module.exports = function(homebridge) {
 							// Only supporting type 'device'
 							const filtered = devices.filter(s => s.type === 'device');
 
-							return bluebird.mapSeries(filtered, device => TelldusLive.getDeviceInfoAsync(device));
+							return bluebird.mapSeries(filtered, device => api.getDeviceInfo(device.id));
 						})
 						.then(devices => {
 							debug('getDeviceInfo responses', devices);
@@ -218,7 +240,7 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
@@ -226,7 +248,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err) => {
+						bluebird.resolve(api.dimDevice(this.device.id, state)).asCallback(err => {
 							callback(err);
 						});
 					});
@@ -240,7 +262,7 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
@@ -248,7 +270,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err) => {
+						bluebird.resolve(api.dimDevice(this.device.id, state)).asCallback(err => {
 							callback(err);
 						});
 					});
@@ -258,7 +280,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 1 : 0;
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
@@ -270,7 +292,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getSensorInfo(this.device, (err, device) => {
+						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err);
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
@@ -287,7 +309,7 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[1].value);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getSensorInfo(this.device, (err, device) => {
+						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err);
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
@@ -306,7 +328,7 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
@@ -322,7 +344,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (powerOn, callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
@@ -330,7 +352,7 @@ module.exports = function(homebridge) {
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
-							TelldusLive.onOffDevice(this.device, powerOn, (err) => {
+							bluebird.resolve(api.onOffDevice(this.device.id, powerOn)).asCallback(err => {
 								callback(err);
 							});
 						});
@@ -347,7 +369,7 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
+						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
 							callback(false, cx.getValueFromDev(cdevice));
@@ -355,7 +377,7 @@ module.exports = function(homebridge) {
 					});
 
 					cx.on('set', (level, callback) => {
-						TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
+						api.dimDevice(this.device.id, util.percentageToBits(level))
 							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
 							.then(() => callback(), err => callback(err));
 					});
@@ -388,7 +410,7 @@ module.exports = function(homebridge) {
 
 						const up = value > 0;
 						this.log(`Door ${up ? 'up' : 'down'}`);
-						TelldusLive.upDownDeviceAsync(this.device, up)
+						api.upDownDevice(this.device.id, up)
 							.then(data => debug(data))
 							.asCallback(callback);
 					});
