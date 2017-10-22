@@ -109,11 +109,14 @@ model (`unknown_accessories`) | Description
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 
-## Common problems / FAQ
+# Auto startup
+To auto startup `homebridge` on boot and auto-restart on crash, I recommend using [PM2](https://nodejs.org/dist/v8.7.0/node-v8.7.0-linux-x64.tar.xz). It allows auto setup of init scripts for popular operating systems.
+
+# Common problems / FAQ
 - `Cannot add a bridged Accessory with the same UUID as another bridged Accessory` - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
 - `Error: listen EADDRINUSE :::51826` - This means that homebridge is already running on the same address. See [#48](https://github.com/jchnlemon/homebridge-telldus/issues/48)
 
-## Reprting issues
+# Reprting issues
 If you are having an issue or wondering about new features, please run homebridge in debug mode and share the log in the issue.
 Run homebridge from the command line as follows:
 
