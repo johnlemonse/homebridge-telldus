@@ -1,7 +1,7 @@
 {
   "name": "homebridge-telldus",
   "description": "Telldus plugin for homebridge",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "scripts": {
     "lint": "eslint ."
   },
