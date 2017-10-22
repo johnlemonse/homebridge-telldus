@@ -137,4 +137,5 @@ Run homebridge from the command line as follows:
 - https://github.com/nfarina/homebridge
 - https://github.com/mifi/telldus-api
 - https://github.com/mifi/telldus-local-auth
+- https://blog.mifi.no/2017/10/22/Use-Apple-HomeKit-to-control-cheap-Telldus-devices/
 - https://developer.telldus.com/blog/2016/05/24/local-api-for-tellstick-znet-lite-beta-now-in-public-beta
