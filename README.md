@@ -9,6 +9,8 @@ Works as a bridge between Apple's HomeKit and the Telldus live platform.
 
 Supports various devices that Telldus support, like wireless switches, dimmers, temperature sensors, so you can control them from your iPhone, iPad & Apple TV.
 
+![](https://mifi.no/uploads/IMG_2777-512.jpg)
+
 # Installation
 Follow the instruction in [homebridge](https://www.npmjs.com/package/homebridge) for the homebridge server installation and how to run.
 
