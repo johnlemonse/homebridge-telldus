@@ -20,7 +20,7 @@ This plugin is published through [npm](https://www.npmjs.com/package/homebridge-
 
 (And if you haven't already: `npm i -g homebridge`)
 
-**⚠️ homebridge-telldus requires node v8 as of v1.0.0**
+**⚠️ As of v1.0.0, homebridge-telldus requires node 8.3 or greater**
 
 For older versions of node, install an old version: `npm install -g homebridge-telldus@0`
 
