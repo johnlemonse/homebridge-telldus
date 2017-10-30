@@ -410,8 +410,8 @@ module.exports = function(homebridge) {
 
 						const up = value > 0;
 						this.log(`Door ${up ? 'up' : 'down'}`);
-						api.upDownDevice(this.device.id, up)
-							.then(data => debug(data))
+						bluebird.resolve(api.upDownDevice(this.device.id, up)
+							.then(data => debug(data)))
 							.asCallback(callback);
 					});
 				}
