@@ -149,7 +149,10 @@ module.exports = function(homebridge) {
 		getAccessories: function() {
 			const createDevice = (device) => {
 				// If we are running against local API, ID's are different
-				const deviceConfig = this.unknownAccessories.find(a => (isLocal ? a.local_id : a.id) == device.id);
+				const deviceConfig = isLocal
+					// https://github.com/jchnlemon/homebridge-telldus/issues/56
+					? this.unknownAccessories.find(a => a.local_id == device.id && ((!a.type && !device.type) || a.type === device.type))
+					: this.unknownAccessories.find(a => a.id == device.id)
 
 				if ((deviceConfig && deviceConfig.disabled)) {
 					this.log(`Device ${device.id} is disabled, ignoring`);
