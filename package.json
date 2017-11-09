@@ -20,8 +20,7 @@
     "homekit"
   ],
   "engines": {
-    "node": ">=8",
-    "homebridge": ">=0.2.5"
+    "node": ">=8"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
