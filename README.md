@@ -83,6 +83,7 @@ As an alternative to Telldus Live, it is also possible to run towards your Telld
 
 When running against local, your devices get new IDs. IDs will now start with 1 instead of a large number as in Live. Use "local_id" instead of "id" in `unknown_accessories` for local. You will see IDs printed when starting up homebridge the first time
 
+Also note that if you have a device with a temp sensor, they will have the same id! Which means that you need to differentiate them by setting `"type": "device"` for the device, and put no `"type"` definition for the sensor, see [#56].
 
 ## Device configuration
 
