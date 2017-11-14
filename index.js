@@ -292,7 +292,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.CurrentTemperature) {
-					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
+					cx.getValueFromDev = dev => parseFloat(((dev.data || [])[0] || {}).value);
 
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
@@ -309,7 +309,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.CurrentRelativeHumidity) {
-					cx.getValueFromDev = dev => parseFloat(dev.data[1].value);
+					cx.getValueFromDev = dev => parseFloat(((dev.data || [])[1] || {}).value);
 
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
