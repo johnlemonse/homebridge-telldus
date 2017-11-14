@@ -81,9 +81,9 @@ As an alternative to Telldus Live, it is also possible to run towards your Telld
 ...
 ```
 
-When running against local, your devices get new IDs. IDs will now start with 1 instead of a large number as in Live. Use "local_id" instead of "id" in `unknown_accessories` for local. You will see IDs printed when starting up homebridge the first time
+When running against local, your devices get new IDs. IDs will now start with 1 instead of a large number as in Live. Use "local_id" instead of "id" in `unknown_accessories` for local. You will see IDs printed when starting up homebridge the first time.
 
-Also note that if you have a device with a temp sensor, they will have the same id! Which means that you need to differentiate them by setting `"type": "device"` for the device, and put no `"type"` definition for the sensor, see [#56].
+Also note that devices with a temp sensor attached will be split but they will both have the same ID! Which means that you need to differentiate these by setting `"type": "device"` for all devices, and put no `"type"` definition for the sensor, see examples below. See also [#56].
 
 ## Device configuration
 
@@ -92,15 +92,34 @@ Also note that if you have a device with a temp sensor, they will have the same 
 ### unknown_accessories parameters
 All these are optional, except for `id`, which is required. (For local API configuration, use `local_id` instead.)
 
-Example device configuration:
+Example device configurations:
+
+If Telldus cannot identify your device, override its model. You can also override the name from Telldus:
 ```
 "id": 123,
 "model": "temperaturehumidity",
 "manufacturer": "Oregon",
 "name": "My Custom Name",
+```
+
+If a device is causing a crash or is not working you can disable it:
+```
+"id": 124,
 "disabled": true,
 ```
 
+If you are using the local API, use `local_id` and `type` instead of `id`. For the device:
+```
+"local_id": 2,
+"type": "device",
+"model": "switch",
+```
+
+And for the attached sensor:
+```
+"local_id": 2,
+"model": "temperaturehumidity",
+```
 
 ## Device models
 model (`unknown_accessories`) | Description
