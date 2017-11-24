@@ -118,14 +118,19 @@ And for the attached sensor:
 ```
 
 ## Device models
-model (`unknown_accessories`) | Description
+These are the models to use in `unknown_accessories` to specify or override device behaviour from Telldus.
+
+model | Description
 --- | ---
-`selflearning-switch` | ◻️ Self learning (pairing) switch
-`selflearning-dimmer` | 🎛 Self learning (pairing) dimmers
-`codeswitch` | ◻️ Old type fixed code switch
-`temperature`, `EA4C` | 🌡 Temperature sensor
-`temperaturehumidity`, `1A2D` | 🌡💦 Combined temperature and humidity sensor
+`switch` | 🎛 On/off switch
+`lightbulb-switch` | 💡 Light bulb with on/off switch
+`outlet` | 🔌 Outlet (on/off switch)
+`lightbulb-dimmer` | 💡 Light bulb with dimmer
+`temperature` | 🌡 Temperature sensor
+`temperaturehumidity` | 🌡💦 Combined temperature and humidity sensor
 `window-covering` | 🚪↕️ Window covering
+`motion-sensor` | 👀 Motion sensor
+
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 

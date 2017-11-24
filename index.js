@@ -16,12 +16,20 @@ module.exports = function(homebridge) {
 
 	const modelDefinitions = [
 		{
+			model: 'lightbulb-switch',
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
+		},
+		{
 			model: 'selflearning-switch',
 			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			model: 'codeswitch',
 			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
+		},
+		{
+			model: 'lightbulb-dimmer',
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
 		},
 		{
 			model: 'selflearning-dimmer',
@@ -57,6 +65,14 @@ module.exports = function(homebridge) {
 		{
 			model: 'switch',
 			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+		},
+		{
+			model: 'outlet',
+			definitions: [{ service: Service.Outlet, characteristics: [ Characteristic.On, Characteristic.OutletInUse ] }],
+		},
+		{
+			model: 'motion-sensor',
+			definitions: [{ service: Service.MotionSensor, characteristics: [ Characteristic.MotionDetected ] }],
 		},
 	];
 
@@ -325,26 +341,31 @@ module.exports = function(homebridge) {
 					});
 				}
 
+				const getValueFromDev = dev => dev.state != 2;
+
+				const parseOnOffValue = (cdevice) => {
+					const value = getValueFromDev(cdevice);
+					this.log("Getting state for switch " + cdevice.name + " [" + (value ? "on" : "off") + "]");
+
+					switch (cx.props.format) {
+						case Characteristic.Formats.INT:
+							return value ? 1 : 0;
+						case Characteristic.Formats.BOOL:
+							return value;
+					}
+				}
+
+				const onCharacteristicGetter = callback =>
+					bluebird.resolve(api.getDeviceInfo(this.device.id))
+						.then(parseOnOffValue)
+						.asCallback(callback);
+
+				if (cx instanceof Characteristic.MotionDetected) {
+					cx.on('get', onCharacteristicGetter);
+				}
+
 				if (cx instanceof Characteristic.On) {
-					cx.getValueFromDev = dev => dev.state != 2;
-
-					cx.value = cx.getValueFromDev(this.device);
-
-					cx.on('get', (callback) => {
-						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
-							if (err) return callback(err);
-							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
-
-							switch (cx.props.format) {
-							case Characteristic.Formats.INT:
-								callback(false, cx.getValueFromDev(cdevice) ? 1 : 0);
-								break;
-							case Characteristic.Formats.BOOL:
-								callback(false, cx.getValueFromDev(cdevice));
-								break;
-							}
-						});
-					});
+					cx.on('get', onCharacteristicGetter);
 
 					cx.on('set', (powerOn, callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
@@ -353,7 +374,7 @@ module.exports = function(homebridge) {
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
-							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
+							if (powerOn && isDimmer && getValueFromDev(cdevice)) return callback();
 
 							bluebird.resolve(api.onOffDevice(this.device.id, powerOn)).asCallback(err => {
 								callback(err);
@@ -362,14 +383,16 @@ module.exports = function(homebridge) {
 					});
 				}
 
+				if (cx instanceof Characteristic.OutletInUse) {
+					cx.on('get', callback => callback(null, true)); // TODO?
+				}
+
 				if (cx instanceof Characteristic.Brightness) {
 					cx.getValueFromDev = dev => {
 						if (dev.state == 1) return 100;
 						if (dev.state == 16 && dev.statevalue !== "unde") return parseInt(dev.statevalue * 100 / 255);
 						return 0;
 					};
-
-					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
