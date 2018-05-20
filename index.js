@@ -301,7 +301,7 @@ module.exports = function(homebridge) {
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
-							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
+							this.log("Getting state for contact sensor " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
@@ -345,7 +345,7 @@ module.exports = function(homebridge) {
 
 				const parseOnOffValue = (cdevice) => {
 					const value = getValueFromDev(cdevice);
-					this.log("Getting state for switch " + cdevice.name + " [" + (value ? "on" : "off") + "]");
+					this.log("Getting state for on-off " + cdevice.name + " [" + (value ? "on" : "off") + "]");
 
 					switch (cx.props.format) {
 						case Characteristic.Formats.INT:
