@@ -159,7 +159,7 @@ module.exports = function(homebridge) {
 				})
 				.catch(err => {
 					this.log(err.message);
-					throw err;
+					throw err; // TODO callback?
 				});
 		},
 		getAccessories: function() {
