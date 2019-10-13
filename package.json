@@ -3,6 +3,7 @@
   "description": "Telldus plugin for homebridge",
   "version": "1.0.5",
   "scripts": {
+    "test": "exit 0",
     "lint": "eslint ."
   },
   "repository": {
