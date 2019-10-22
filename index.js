@@ -17,7 +17,7 @@ module.exports = function(homebridge) {
 	const modelDefinitions = [
 		{
 			model: 'selflearning-switch',
-			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			model: 'codeswitch',
