@@ -29,6 +29,6 @@
     "telldus-api": "^1.0.3"
   },
   "devDependencies": {
-    "eslint": "^3.9.0"
+    "eslint": "^4.18.2"
   }
 }
