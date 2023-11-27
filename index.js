@@ -310,12 +310,17 @@ module.exports = function(homebridge) {
 
 				if (cx instanceof Characteristic.CurrentRelativeHumidity) {
 					cx.getValueFromDev = dev => parseFloat(((dev.data || [])[1] || {}).value);
-
+					
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err);
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
-							callback(false, cx.getValueFromDev(device));
+							//ADDED THIS ROW TO BREAK AWAY FROM NaN 
+							if (isNaN(cx.getValueFromDev(device))) {
+								callback(false, 0);	
+							}else {
+								callback(false, cx.getValueFromDev(device));
+							}
 						});
 					});
 
