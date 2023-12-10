@@ -6,6 +6,10 @@
     "test": "exit 0",
     "lint": "eslint ."
   },
+  "files": [
+    "index.js",
+    "util.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/jchnlemon/homebridge-telldus"
