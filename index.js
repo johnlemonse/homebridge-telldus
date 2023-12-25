@@ -316,10 +316,12 @@ module.exports = function(homebridge) {
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err);
-							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
+							
 							if (isNaN(cx.getValueFromDev(device))) {
+								this.log("Getting temp for sensor " + device.name + " [0]");
 								callback(false, 0);
 							} else {
+								this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 								callback(false, cx.getValueFromDev(device));
 							}
 						});
@@ -336,12 +338,14 @@ module.exports = function(homebridge) {
 					
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
-							if (err) return callback(err);
-							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
+							if (err) return callback(err); 
+							
 							//ADDED THIS ROW TO BREAK AWAY FROM NaN 
 							if (isNaN(cx.getValueFromDev(device))) {
+								this.log("Getting humidity for sensor " + device.name + " [0]");
 								callback(false, 0);	
 							}else {
+								this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 								callback(false, cx.getValueFromDev(device));
 							}
 						});
