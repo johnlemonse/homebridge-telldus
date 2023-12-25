@@ -60,8 +60,23 @@ module.exports = function(homebridge) {
 		},
 		{
 			model: '010f-0c02-1003',
-			definition: [{ service: Service.TemperatureSensor, characteristic: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
+		{
+			model: '019a-0003-000a',
+			definitions: [
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+			]
+		},
+		{
+			model: '0060-0015-0001',
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+		},
+		{
+			model: '0154-0003-000a',
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+		},		
 	];
 
 	homebridge.registerPlatform("homebridge-telldus", "Telldus", TelldusPlatform);
@@ -302,7 +317,11 @@ module.exports = function(homebridge) {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err);
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
-							callback(false, cx.getValueFromDev(device));
+							if (isNaN(cx.getValueFromDev(device))) {
+								callback(false, 0);
+							} else {
+								callback(false, cx.getValueFromDev(device));
+							}
 						});
 					});
 
