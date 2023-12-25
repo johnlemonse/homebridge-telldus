@@ -1,14 +1,14 @@
 {
   "name": "homebridge-telldus",
   "description": "Telldus plugin for homebridge",
-  "version": "1.0.7",
+  "version": "1.1.1",
   "scripts": {
     "test": "exit 0",
     "lint": "eslint ."
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jchnlemon/homebridge-telldus"
+    "url": "git://github.com/senilpon/homebridge-telldus"
   },
   "license": "ISC",
   "preferGlobal": true,
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.6",
+    "homebridge": "^1.7.0",
     "telldus-api": "^1.0.3"
   },
   "devDependencies": {
