@@ -1,7 +1,7 @@
 'use strict';
 
 const bluebird = require('bluebird');
-const debug = require('debug')('homebridge-telldus');
+const debug = require('debug')('homebridge-telldus-pn');
 
 const { LocalApi, LiveApi } = require('telldus-api');
 
@@ -339,7 +339,7 @@ module.exports = function(homebridge) {
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
 							if (err) return callback(err); 
-							
+
 							//ADDED THIS ROW TO BREAK AWAY FROM NaN 
 							if (isNaN(cx.getValueFromDev(device))) {
 								this.log("Getting humidity for sensor " + device.name + " [0]");

@@ -10,25 +10,25 @@ Supports various devices that Telldus support, like wireless switches, dimmers, 
 # Installation
 Follow the instruction in [homebridge](https://www.npmjs.com/package/homebridge) for the homebridge server installation and how to run.
 
-This plugin is published through [npm](https://www.npmjs.com/package/homebridge-telldus) and should be installed "globally" by typing:
+This plugin is published through [npm](https://www.npmjs.com/package/homebridge-telldus-pn) and should be installed "globally" by typing:
 
-`npm i -g homebridge-telldus`
+`npm i -g homebridge-telldus-pn`
 
 (And if you haven't already: `npm i -g homebridge`)
 
-**⚠️ As of v1.0.0, homebridge-telldus requires node 8.3 or greater**
+**⚠️ As of v1.0.0, homebridge-telldus-pn requires node 8.3 or greater**
 
-For older versions of node, install an old version: `npm install -g homebridge-telldus@0`
+For older versions of node, install an old version: `npm install -g homebridge-telldus-pn@0`
 
 ## Configuration
 
-For a sample homebridge config file, see [config.json](https://github.com/jchnlemon/homebridge-telldus/blob/master/config.json).
+For a sample homebridge config file, see [config.json](https://github.com/senilpon/homebridge-telldus/blob/master/config.json).
 
 See [homebridge](https://github.com/nfarina/homebridge) for where `config.json` is stored. Typically in `~/.homebridge/config.json`
 
 ### Live configuration
 
-You need to configure your telldus live integration by creating API secrets/tokens in the telldus live web admin. Log in to your Live account, go to http://api.telldus.com/ and `Generate a private token for my user only`.
+You need to configure your telldus live integration by creating API secrets/tokens in the telldus live web admin. Log in to your Live account, go to http://pa-api.telldus.com/ and `Generate a private token for my user only`.
 
 Put these generated values in homebridge `config.json`:
 
@@ -56,7 +56,7 @@ As an alternative to Telldus Live, it is also possible to run towards your Telld
 #### Local setup instructions
 1. Find the LAN IP address of your TellStick device
 - Install [telldus-local-auth](https://github.com/mifi/telldus-local-auth): `npm i -g telldus-local-auth`
-- Run in a terminal `telldus-local-auth <IP OF YOUR DEVICE> homebridge-telldus`. This will open a browser window. **See further instructions in the terminal.**
+- Run in a terminal `telldus-local-auth <IP OF YOUR DEVICE> homebridge-telldus-pn`. This will open a browser window. **See further instructions in the terminal.**
 - Note the returned token.
 - Instead of `public_key`, `private_key`, `token`, and `token_secret` in `config.json`, add a `local` section like this:
 
@@ -83,7 +83,7 @@ Also note that devices with a temp sensor attached will be split but they will b
 
 ## Device configuration
 
-`homebridge-telldus` tries to auto-detect devices from telldus. However some devices do not have the correct type or other parameters set. You can override/set these parameters from the homebridge config file. This is what the `unknown_accessories` property in `config.json` is for.
+`homebridge-telldus-pn` tries to auto-detect devices from telldus. However some devices do not have the correct type or other parameters set. You can override/set these parameters from the homebridge config file. This is what the `unknown_accessories` property in `config.json` is for.
 
 ### unknown_accessories parameters
 All these are optional, except for `id`, which is required. (For local API configuration, use `local_id` instead.)
@@ -129,6 +129,13 @@ model (`unknown_accessories`) | Description
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 
+Extra: 
+--- | ---
+`010f-0c02-1003` | 🌡 Temperature sensor
+`0060-0015-0001` | 🌡 Temperature sensor
+`019a-0003-000a` | 🌡💦 Combined temperature and humidity sensor
+`0154-0003-000a` | ◻️ Self learning (pairing) switch
+
 # Auto startup
 To auto startup `homebridge` on boot and auto-restart on crash, I recommend using [PM2](https://nodejs.org/dist/v8.7.0/node-v8.7.0-linux-x64.tar.xz). It allows auto setup of init scripts for popular operating systems.
 
@@ -149,7 +156,7 @@ If all went good, homebridge will now run automatically on boot
 If you are having an issue or wondering about new features, please run homebridge in debug mode and share the log in the issue.
 Run homebridge from the command line as follows:
 
-```$ DEBUG=homebridge-telldus,telldus-api homebridge```
+```$ DEBUG=homebridge-telldus-pn,telldus-api homebridge```
 
 # Links
 - https://github.com/nfarina/homebridge
