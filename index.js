@@ -352,7 +352,7 @@ module.exports = function(homebridge) {
 
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
-							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
+							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1 || cdevice.statevalue !== '0';
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
 							bluebird.resolve(api.onOffDevice(this.device.id, powerOn)).asCallback(err => {
