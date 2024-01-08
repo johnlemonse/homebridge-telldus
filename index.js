@@ -2,11 +2,8 @@
 
 const bluebird = require('bluebird');
 const debug = require('debug')('homebridge-telldus-pn');
-
 const { LocalApi, LiveApi } = require('telldus-api');
-
 const util = require('./util');
-
 
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
@@ -265,6 +262,7 @@ module.exports = function(homebridge) {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
+							bluebird.delay(1000) //API Delay
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
@@ -381,7 +379,7 @@ module.exports = function(homebridge) {
 					cx.on('set', (powerOn, callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
-
+							bluebird.delay(1000) //API Delay
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
@@ -407,6 +405,7 @@ module.exports = function(homebridge) {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
+							bluebird.delay(1000) //API Delay
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
@@ -447,11 +446,11 @@ module.exports = function(homebridge) {
 						this.log(`Door ${up ? 'up' : 'down'}`);
 						bluebird.resolve(api.upDownDevice(this.device.id, up)
 							.then(data => debug(data)))
+							.then(() => bluebird.delay(1000)) //API Delay
 							.asCallback(callback);
 					});
 				}
 			});
-
 			return service;
 		}
 	};
