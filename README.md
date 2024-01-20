@@ -149,6 +149,7 @@ If all went good, homebridge will now run automatically on boot
 # Common problems / FAQ
 - `Cannot add a bridged Accessory with the same UUID as another bridged Accessory` - See [#41](https://github.com/jchnlemon/homebridge-telldus/issues/41)
 - `Error: listen EADDRINUSE :::51826` - This means that homebridge is already running on the same address. See [#48](https://github.com/jchnlemon/homebridge-telldus/issues/48)
+- `Homebridge running okey without any error messages, but none of the devices is showing in homekit.` - add ``` "disabled": true ``` to all telldus devices and enable them one by one. Report the device type that is not working so patch can be created.
 
 # Reprting issues
 If you are having an issue or wondering about new features, please run homebridge in debug mode and share the log in the issue.
