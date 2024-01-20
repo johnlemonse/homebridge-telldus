@@ -121,15 +121,16 @@ And for the attached sensor:
 model (`unknown_accessories`) | Description
 --- | ---
 `selflearning-switch` | ◻️ Self learning (pairing) switch
+`0154-0003-000a` | ◻️ Self learning (pairing) switch
 `selflearning-dimmer` | 🎛 Self learning (pairing) dimmers
 `codeswitch` | ◻️ Old type fixed code switch
 `temperature`, `EA4C` | 🌡 Temperature sensor
-`temperaturehumidity`, `1A2D` | 🌡💦 Combined temperature and humidity sensor
-`window-covering` | 🚪↕️ Window covering
 `010f-0c02-1003` | 🌡 Temperature sensor
 `0060-0015-0001` | 🌡 Temperature sensor
 `019a-0003-000a` | 🌡💦 Combined temperature and humidity sensor
-`0154-0003-000a` | ◻️ Self learning (pairing) switch
+`temperaturehumidity`, `1A2D` | 🌡💦 Combined temperature and humidity sensor
+`window-covering` | 🚪↕️ Window covering
+
 See also:
 [Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 
