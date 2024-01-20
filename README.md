@@ -126,15 +126,12 @@ model (`unknown_accessories`) | Description
 `temperature`, `EA4C` | 🌡 Temperature sensor
 `temperaturehumidity`, `1A2D` | 🌡💦 Combined temperature and humidity sensor
 `window-covering` | 🚪↕️ Window covering
-See also:
-[Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
-
-Extra: 
---- | ---
 `010f-0c02-1003` | 🌡 Temperature sensor
 `0060-0015-0001` | 🌡 Temperature sensor
 `019a-0003-000a` | 🌡💦 Combined temperature and humidity sensor
 `0154-0003-000a` | ◻️ Self learning (pairing) switch
+See also:
+[Telldus Compatibility](http://old.telldus.com/products/compability) (note: not all of these are yet supported.)
 
 # Auto startup
 To auto startup `homebridge` on boot and auto-restart on crash, I recommend using [PM2](https://nodejs.org/dist/v8.7.0/node-v8.7.0-linux-x64.tar.xz). It allows auto setup of init scripts for popular operating systems.
