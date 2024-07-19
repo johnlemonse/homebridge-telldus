@@ -5,6 +5,51 @@ const debug = require('debug')('homebridge-telldus-pn');
 const { LocalApi, LiveApi } = require('telldus-api');
 const util = require('./util');
 
+const fs = require("fs");
+const { stringify } = require('querystring');
+
+const commands = {
+	on: 0x0001, // 1
+	off: 0x0002, // 2
+	bell: 0x0004, // 4
+	toggle: 0x0008, // 8
+	dim: 0x0010, // 16
+	learn: 0x0020, // 32
+	execute: 0x0040, // 64
+	up: 0x0080, // 128
+	down: 0x0100, // 256
+	stop: 0x0200, // 512
+	rgb: 0x0400, // 1024
+	thermostat: 0x800, // 2048
+  };
+
+  // mask for device matching with out dimming
+  const noDimmerMask = Object.values(commands).reduce((memo, num) => memo + num, 0) - commands.dim;  // all but dimmer
+
+  const deviceTypes = {
+	unknown: '00000000-0001-1000-2005-ACCA54000000', 
+	alarmSensor: '00000001-0001-1000-2005-ACCA54000000',
+	container: '00000002-0001-1000-2005-ACCA54000000',
+	controller: '00000003-0001-1000-2005-ACCA54000000',
+	doorWindow: '00000004-0001-1000-2005-ACCA54000000',
+	light: '00000005-0001-1000-2005-ACCA54000000',
+	lock: '00000006-0001-1000-2005-ACCA54000000',
+	media: '00000007-0001-1000-2005-ACCA54000000',
+	meter: '00000008-0001-1000-2005-ACCA54000000',
+	motion: '00000009-0001-1000-2005-ACCA54000000',
+	onOffSensor: '0000000A-0001-1000-2005-ACCA54000000',
+	person: '0000000B-0001-1000-2005-ACCA54000000',
+	remoteControl: '0000000C-0001-1000-2005-ACCA54000000',
+	sensor: '0000000D-0001-1000-2005-ACCA54000000',
+	smokeSensor: '0000000E-0001-1000-2005-ACCA54000000',
+	speaker: '0000000F-0001-1000-2005-ACCA54000000',
+	switchOutlet: '00000010-0001-1000-2005-ACCA54000000',
+	thermostat: '00000011-0001-1000-2005-ACCA54000000',
+	virtual: '00000012-0001-1000-2005-ACCA54000000',
+	windowCovering: '00000013-0001-1000-2005-ACCA54000000',
+	projectorScreen: '00000014-0001-1000-2005-ACCA54000000',
+  };
+
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
 	const Characteristic = homebridge.hap.Characteristic;
@@ -13,18 +58,47 @@ module.exports = function(homebridge) {
 
 	const modelDefinitions = [
 		{
+			deviceType: deviceTypes.light,
 			model: 'selflearning-switch',
 			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
 		},
 		{
+			deviceType: deviceTypes.light,
 			model: 'codeswitch',
 			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
 		},
 		{
+			commandMask: commands.dim,
+			deviceType: deviceTypes.light,
 			model: 'selflearning-dimmer',
 			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
 		},
 		{
+			deviceType: deviceTypes.doorWindow,
+			model: 'selflearning-switch',  // nexa
+			definitions: [{ service: Service.Window, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
+		},
+		{
+			deviceType: deviceTypes.windowCovering,
+			model: 'window-covering',
+			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
+		},
+		{
+			deviceType: deviceTypes.smokeSensor,
+			model: 'smokesensor',
+			definitions: [{ service: Service.SmokeSensor, characteristics: [ Characteristic.SmokeDetected ] }],
+		},
+		{
+			deviceType: deviceTypes.switchOutlet,
+			model: 'switch',
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+		},
+		{
+			deviceType: deviceTypes.switchOutlet,
+			model: '0154-0003-000a',
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+		},		
+		{	// Sensors starts here
 			model: 'temperature',
 			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
@@ -32,6 +106,14 @@ module.exports = function(homebridge) {
 		{
 			model: 'EA4C',
 			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+		},
+		{	// special case with yr.no plugin in telldus
+			model: 'n\/a',
+			protocol: 'YR',
+			definitions: [
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+			]
 		},
 		{
 			model: 'temperaturehumidity',
@@ -48,14 +130,6 @@ module.exports = function(homebridge) {
 			]
 		},
 		{
-			model: 'window-covering',
-			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
-		},
-		{
-			model: 'switch',
-			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
-		},
-		{
 			model: '010f-0c02-1003',
 			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
@@ -70,10 +144,6 @@ module.exports = function(homebridge) {
 			model: '0060-0015-0001',
 			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
-		{
-			model: '0154-0003-000a',
-			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
-		},		
 	];
 
 	homebridge.registerPlatform("homebridge-telldus-pn", "Telldus", TelldusPlatform);
@@ -109,7 +179,7 @@ module.exports = function(homebridge) {
 				secret,
 				tokenKey,
 				tokenSecret,
-			});
+			}, log);  // pass log object to log inside api
 		}
 
 		this.unknownAccessories = config["unknown_accessories"] || [];
@@ -186,9 +256,16 @@ module.exports = function(homebridge) {
 			return api.listSensors()
         .then(sensors => {
 					debug('getSensors response', sensors);
-          this.log(`Found ${sensors.length} sensors in telldus live.`);
+			        this.log(`Found ${sensors.length} sensors in telldus live.`);
 
-					return sensors.map(sensor => createDevice(sensor)).filter(sensor => sensor);
+					// filter out unsupported sensors
+					// model = "n/a"
+					// exceoption is yr.no plugin
+					const filtered = sensors.filter(s => !(s.model == 'n\/a' && s.protocol != 'yr'));
+
+					// this.log(`Filtered sensors ${JSON.stringify(filtered, null, 2)}`);					
+
+					return filtered.map(sensor => createDevice(sensor)).filter(sensor => sensor);
         })
 				.then(sensors => {
 					return api.listDevices()
@@ -196,10 +273,12 @@ module.exports = function(homebridge) {
 							debug('getDevices response', devices);
 							this.log(`Found ${devices.length} devices in telldus live.`);
 
-							// Only supporting type 'device'
-							const filtered = devices.filter(s => s.type === 'device');
+							// Only supporting type 'device' and when methods exists
+							// TODO: Smoke detector is ignored here. Telldus does not send correct devicetype
+							const filtered = devices.filter(s => s.type === 'device' && s.methods > 0);
 
-							return bluebird.mapSeries(filtered, device => api.getDeviceInfo(device.id));
+							return bluebird.mapSeries(filtered, device => device);  // No need to look up as all info is here
+//							return bluebird.mapSeries(filtered, device => api.getDeviceInfo(device.id));
 						})
 						.then(devices => {
 							debug('getDeviceInfo responses', devices);
@@ -226,16 +305,50 @@ module.exports = function(homebridge) {
 				.setCharacteristic(Characteristic.Model, this.model)
 				.setCharacteristic(Characteristic.SerialNumber, this.id);
 
-			const modelDefinition = modelDefinitions.find(d => d.model === this.model);
+				// this.log(`this ${JSON.stringify(this, null, 2)}`);
+
+				// this.log(`Device ${this.name}, model ${this.model}, devicteype ${this.device.deviceType}, methods ${this.device.methods}`);
+
+
+			// Model is missing for devices, find by devicetype and command combination (dimmer only for now)
+			const modelDeviceDimmer = modelDefinitions.find(d => {
+
+				// upper case devicetype first
+				const deviceType = this.device.deviceType ? this.device.deviceType.toUpperCase() : '';
+				return	d.deviceType == deviceType && (this.device.methods & d.commandMask) == commands.dim;
+			});
+			
+			const modelDevice = modelDefinitions.find(d => {
+
+				// upper case devicetype first
+				const deviceType = this.device.deviceType ? this.device.deviceType.toUpperCase() : '';
+				return	d.deviceType == deviceType;
+			});
+
+			const modelSensor = modelDefinitions.find(d => {
+				// handle protocol if that is used to find correct type
+				const protocol = this.device.protocol ? this.device.protocol.toUpperCase() : '';			
+				return	d.model === this.model || protocol == d.protocol;
+			});
 
 			let services = [];
 
-			if (modelDefinition) {
-				services = modelDefinition.definitions.map(this.configureServiceCharacteristics.bind(this));
+			// model check first (sensors)
+			if (modelSensor) {
+				// this.log(`Device ${this.name}, sensor`);
+				services = modelSensor.definitions.map(this.configureServiceCharacteristics.bind(this));
+			} // dimmer
+			else if (modelDeviceDimmer) {
+				// this.log(`Device ${this.name}, Dimmer`);
+				services = modelDeviceDimmer.definitions.map(this.configureServiceCharacteristics.bind(this));
+			} // other devices
+			else if (modelDevice) {
+				// this.log(`Device ${this.name}, Other device`);
+				services = modelDevice.definitions.map(this.configureServiceCharacteristics.bind(this));
 			}
 			else {
 				this.log(
-					`Your device (model ${this.device.model}, id ${this.id}) is not auto detected from telldus live. Please add the following to your config, under telldus platform (replace MODEL with a valid type, and optionally set manufacturer):\n` +
+					`Your device (Name ${this.name}, model ${this.model}, id ${this.id}) is not auto detected from telldus live. Please add the following to your config, under telldus platform (replace MODEL with a valid type, and optionally set manufacturer):\n` +
 					`"unknown_accessories": [{ "id": ${this.id}, "model": "MODEL", "manufacturer": "unknown" }]\n` +
 					`Valid models are: ${modelDefinitions.map(d => d.model).join(', ')}`
 				);
@@ -252,6 +365,7 @@ module.exports = function(homebridge) {
 				const cx = service.getCharacteristic(characteristic);
 
 				if (cx instanceof Characteristic.SecuritySystemCurrentState) {
+
 					cx.getValueFromDev = dev => {
 						if (dev.state == 2) return 3;
 						if (dev.state == 16 && dev.statevalue !== "unde") return parseInt(dev.statevalue);
@@ -262,7 +376,7 @@ module.exports = function(homebridge) {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
-							bluebird.delay(1000) //API Delay
+							// bluebird.delay(1000) //API Delay
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
@@ -297,7 +411,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.ContactSensorState) {
-					cx.getValueFromDev = dev => dev.state == 1 ? 1 : 0;
+					cx.getValueFromDev = dev => dev.state == commands.on ? commands.on : 0;
 
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
@@ -309,7 +423,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.CurrentTemperature) {
-					cx.getValueFromDev = dev => parseFloat(((dev.data || [])[0] || {}).value);
+					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'temp') || [])[0] || {}).value);  // find value by name
 
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
@@ -332,7 +446,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.CurrentRelativeHumidity) {
-					cx.getValueFromDev = dev => parseFloat(((dev.data || [])[1] || {}).value);
+					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'humidity') || [])[0] || {}).value);  // find value by name
 					
 					cx.on('get', (callback) => {
 						bluebird.resolve(api.getSensorInfo(this.device.id)).asCallback((err, device) => {
@@ -356,7 +470,7 @@ module.exports = function(homebridge) {
 				}
 
 				if (cx instanceof Characteristic.On) {
-					cx.getValueFromDev = dev => dev.state != 2;
+					cx.getValueFromDev = dev => dev.state != commands.off;  // True/False retur
 
 					cx.value = cx.getValueFromDev(this.device);
 
@@ -379,24 +493,51 @@ module.exports = function(homebridge) {
 					cx.on('set', (powerOn, callback) => {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
-							bluebird.delay(1000) //API Delay
+
+							this.log("Set power on " + cdevice.name);
+							this.log("Set power on state: " + cdevice.state);
+							this.log("Set power on statevalue: " + cdevice.statevalue);
+
+							bluebird.delay(500) //API Delay
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
-							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
+							// if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
-							bluebird.resolve(api.onOffDevice(this.device.id, powerOn)).asCallback(err => {
-								callback(err);
-							});
+							if (powerOn && isDimmer) {  // set dimvalue instead of power on
+								bluebird.resolve(api.dimDevice(cdevice.id, cdevice.statevalue)).asCallback(err => {
+									callback(err);
+								});
+							}
+							else {  // on off
+								bluebird.resolve(api.onOffDevice(cdevice.id, powerOn)).asCallback(err => {
+									callback(err);
+								});
+							}
+
+
+							// 16 hvis dimmer og < 100%, ellers 2
+							// kalle opp dimming i stedet?
+							
+							// bluebird.resolve(api.onOffDevice(this.device.id, powerOn)).asCallback(err => {
+							//	callback(err);
+							// });
 						});
 					});
 				}
 
 				if (cx instanceof Characteristic.Brightness) {
 					cx.getValueFromDev = dev => {
-						if (dev.state == 1) return 100;
-						if (dev.state == 16 && dev.statevalue !== "unde") return parseInt(dev.statevalue * 100 / 255);
-						return 0;
+
+						// this.log(`Getting value for dimmer ${dev.name} state: ${dev.state}, stateValue: ${dev.statevalue}`);
+
+						if (dev.state == 1) return 100; 
+						if (dev.state == 16 && dev.statevalue !== "unde")
+							{
+								const value = util.bitsToPercentage(dev.statevalue)
+								return value;
+							}
+						return 0; // state 0 or 2 = off
 					};
 
 					cx.value = cx.getValueFromDev(this.device);
@@ -405,15 +546,18 @@ module.exports = function(homebridge) {
 						bluebird.resolve(api.getDeviceInfo(this.device.id)).asCallback((err, cdevice) => {
 							if (err) return callback(err);
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
-							bluebird.delay(1000) //API Delay
+							//bluebird.delay(1000) //API Delay
 							callback(false, cx.getValueFromDev(cdevice));
 						});
 					});
 
 					cx.on('set', (level, callback) => {
+
+						this.log(`Dimmer set value ${this.device.name}, value ${level}`);
+
 						api.dimDevice(this.device.id, util.percentageToBits(level))
-							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
-							.then(() => callback(), err => callback(err));
+							.then(() => bluebird.delay(200)) // Delay to wait for power on to be completed
+							.then(() => callback(null), err => callback(err));
 					});
 				}
 
@@ -446,7 +590,7 @@ module.exports = function(homebridge) {
 						this.log(`Door ${up ? 'up' : 'down'}`);
 						bluebird.resolve(api.upDownDevice(this.device.id, up)
 							.then(data => debug(data)))
-							.then(() => bluebird.delay(1000)) //API Delay
+							//.then(() => bluebird.delay(1000)) //API Delay
 							.asCallback(callback);
 					});
 				}
