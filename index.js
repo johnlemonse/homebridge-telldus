@@ -60,89 +60,89 @@ module.exports = function(homebridge) {
 		{
 			deviceType: deviceTypes.light,
 			model: 'selflearning-switch',
-			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ api.hap.On ] }],
 		},
 		{
 			deviceType: deviceTypes.light,
 			model: 'codeswitch',
-			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ api.hap.On ] }],
 		},
 		{
 			commandMask: commands.dim,
 			deviceType: deviceTypes.light,
 			model: 'selflearning-dimmer',
-			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ api.hap.On, api.hap.Brightness ] }],
 		},
 		{
 			deviceType: deviceTypes.doorWindow,
 			model: 'selflearning-switch',  // nexa
-			definitions: [{ service: Service.Window, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
+			definitions: [{ service: Service.Window, characteristics: [ api.hap.CurrentPosition, api.hap.TargetPosition, api.hap.PositionState ] }],
 		},
 		{
 			deviceType: deviceTypes.windowCovering,
 			model: 'window-covering',
-			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
+			definitions: [{ service: Service.WindowCovering, characteristics: [ api.hap.CurrentPosition, api.hap.TargetPosition, api.hap.PositionState ] }],
 		},
 		{
 			deviceType: deviceTypes.smokeSensor,
 			model: 'smokesensor',
-			definitions: [{ service: Service.SmokeSensor, characteristics: [ Characteristic.SmokeDetected ] }],
+			definitions: [{ service: Service.SmokeSensor, characteristics: [ api.hap.SmokeDetected ] }],
 		},
 		{
 			deviceType: deviceTypes.switchOutlet,
 			model: 'switch',
-			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ Charaapi.hapcteristic.On ] }],
 		},
 		{
 			deviceType: deviceTypes.switchOutlet,
 			model: '0154-0003-000a',
-			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ api.hap.On ] }],
 		},		
 		{	// Sensors starts here
 			model: 'temperature',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
 		},
 		// oregon protocol temperature sensor model
 		{
 			model: 'EA4C',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
 		},
 		{	// special case with yr.no plugin in telldus
 			model: 'n\/a',
 			protocol: 'YR',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: 'temperaturehumidity',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '1A2D',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '010f-0c02-1003',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
 		},
 		{
 			model: '019a-0003-000a',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '0060-0015-0001',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
 		},
 	];
 
@@ -301,9 +301,9 @@ module.exports = function(homebridge) {
 			const accessoryInformation = new Service.AccessoryInformation();
 
 			accessoryInformation
-				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-				.setCharacteristic(Characteristic.Model, this.model)
-				.setCharacteristic(Characteristic.SerialNumber, this.id);
+				.setCharacteristic(api.hap.Manufacturer, this.manufacturer)
+				.setCharacteristic(api.hap.Model, this.model)
+				.setCharacteristic(api.hap.SerialNumber, this.id);
 
 				// this.log(`this ${JSON.stringify(this, null, 2)}`);
 
@@ -364,7 +364,7 @@ module.exports = function(homebridge) {
 			characteristics.forEach(characteristic => {
 				const cx = service.getCharacteristic(characteristic);
 
-				if (cx instanceof Characteristic.SecuritySystemCurrentState) {
+				if (cx instanceof api.hap.SecuritySystemCurrentState) {
 
 					cx.getValueFromDev = dev => {
 						if (dev.state == 2) return 3;
@@ -388,7 +388,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.SecuritySystemTargetState) {
+				if (cx instanceof api.hap.SecuritySystemTargetState) {
 					cx.getValueFromDev = dev => {
 						if (dev.state == 2) return 3;
 						if (dev.state == 16 && dev.statevalue !== "unde") return parseInt(dev.statevalue);
@@ -410,7 +410,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.ContactSensorState) {
+				if (cx instanceof api.hap.ContactSensorState) {
 					cx.getValueFromDev = dev => dev.state == commands.on ? commands.on : 0;
 
 					cx.on('get', (callback) => {
@@ -422,7 +422,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.CurrentTemperature) {
+				if (cx instanceof api.hap.CurrentTemperature) {
 					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'temp') || [])[0] || {}).value);  // find value by name
 
 					cx.on('get', (callback) => {
@@ -445,7 +445,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.CurrentRelativeHumidity) {
+				if (cx instanceof api.hap.CurrentRelativeHumidity) {
 					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'humidity') || [])[0] || {}).value);  // find value by name
 					
 					cx.on('get', (callback) => {
@@ -469,7 +469,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.On) {
+				if (cx instanceof api.hap.On) {
 					cx.getValueFromDev = dev => dev.state != commands.off;  // True/False retur
 
 					cx.value = cx.getValueFromDev(this.device);
@@ -480,10 +480,10 @@ module.exports = function(homebridge) {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
 							switch (cx.props.format) {
-							case Characteristic.Formats.INT:
+							case api.hap.Formats.INT:
 								callback(false, cx.getValueFromDev(cdevice) ? 1 : 0);
 								break;
-							case Characteristic.Formats.BOOL:
+							case api.hap.Formats.BOOL:
 								callback(false, cx.getValueFromDev(cdevice));
 								break;
 							}
@@ -526,7 +526,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.Brightness) {
+				if (cx instanceof api.hap.Brightness) {
 					cx.getValueFromDev = dev => {
 
 						// this.log(`Getting value for dimmer ${dev.name} state: ${dev.state}, stateValue: ${dev.statevalue}`);
@@ -561,7 +561,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof Characteristic.CurrentPosition) {
+				if (cx instanceof api.hap.CurrentPosition) {
 					cx.on('get', callback => bluebird.try(() => {
 						const resp = this.cachedValue || 0;
 						this.log(`Get CurrentPosition ${resp}`);
@@ -569,14 +569,14 @@ module.exports = function(homebridge) {
 					}).asCallback(callback));
 				}
 
-				if (cx instanceof Characteristic.PositionState) {
+				if (cx instanceof api.hap.PositionState) {
 					cx.on('get', callback => bluebird.try(() => {
 						this.log(`Get PositionState`);
 						return 2;
 					}).asCallback(callback));
 				}
 
-				if (cx instanceof Characteristic.TargetPosition) {
+				if (cx instanceof api.hap.TargetPosition) {
 					cx.on('get', callback => bluebird.try(() => {
 						const resp = this.cachedValue || 0;
 						this.log(`Get TargetPosition ${resp}`);
