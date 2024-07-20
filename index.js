@@ -4,7 +4,6 @@ const bluebird = require('bluebird');
 const debug = require('debug')('homebridge-telldus-pn');
 const { LocalApi, LiveApi } = require('telldus-api');
 const util = require('./util');
-
 const fs = require("fs");
 const { stringify } = require('querystring');
 
@@ -21,12 +20,12 @@ const commands = {
 	stop: 0x0200, // 512
 	rgb: 0x0400, // 1024
 	thermostat: 0x800, // 2048
-  };
+};
 
-  // mask for device matching with out dimming
-  const noDimmerMask = Object.values(commands).reduce((memo, num) => memo + num, 0) - commands.dim;  // all but dimmer
+// mask for device matching without dimming
+const noDimmerMask = Object.values(commands).reduce((memo, num) => memo + num, 0) - commands.dim;  // all but dimmer
 
-  const deviceTypes = {
+const deviceTypes = {
 	unknown: '00000000-0001-1000-2005-ACCA54000000', 
 	alarmSensor: '00000001-0001-1000-2005-ACCA54000000',
 	container: '00000002-0001-1000-2005-ACCA54000000',
@@ -48,7 +47,7 @@ const commands = {
 	virtual: '00000012-0001-1000-2005-ACCA54000000',
 	windowCovering: '00000013-0001-1000-2005-ACCA54000000',
 	projectorScreen: '00000014-0001-1000-2005-ACCA54000000',
-  };
+};
 
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
@@ -60,89 +59,89 @@ module.exports = function(homebridge) {
 		{
 			deviceType: deviceTypes.light,
 			model: 'selflearning-switch',
-			definitions: [{ service: Service.Switch, characteristics: [ api.hap.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			deviceType: deviceTypes.light,
 			model: 'codeswitch',
-			definitions: [{ service: Service.Lightbulb, characteristics: [ api.hap.On ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			commandMask: commands.dim,
 			deviceType: deviceTypes.light,
 			model: 'selflearning-dimmer',
-			definitions: [{ service: Service.Lightbulb, characteristics: [ api.hap.On, api.hap.Brightness ] }],
+			definitions: [{ service: Service.Lightbulb, characteristics: [ Characteristic.On, Characteristic.Brightness ] }],
 		},
 		{
 			deviceType: deviceTypes.doorWindow,
 			model: 'selflearning-switch',  // nexa
-			definitions: [{ service: Service.Window, characteristics: [ api.hap.CurrentPosition, api.hap.TargetPosition, api.hap.PositionState ] }],
+			definitions: [{ service: Service.Window, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
 		},
 		{
 			deviceType: deviceTypes.windowCovering,
 			model: 'window-covering',
-			definitions: [{ service: Service.WindowCovering, characteristics: [ api.hap.CurrentPosition, api.hap.TargetPosition, api.hap.PositionState ] }],
+			definitions: [{ service: Service.WindowCovering, characteristics: [ Characteristic.CurrentPosition, Characteristic.TargetPosition, Characteristic.PositionState ] }],
 		},
 		{
 			deviceType: deviceTypes.smokeSensor,
 			model: 'smokesensor',
-			definitions: [{ service: Service.SmokeSensor, characteristics: [ api.hap.SmokeDetected ] }],
+			definitions: [{ service: Service.SmokeSensor, characteristics: [ Characteristic.SmokeDetected ] }],
 		},
 		{
 			deviceType: deviceTypes.switchOutlet,
 			model: 'switch',
-			definitions: [{ service: Service.Switch, characteristics: [ Charaapi.hapcteristic.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
 		},
 		{
 			deviceType: deviceTypes.switchOutlet,
 			model: '0154-0003-000a',
-			definitions: [{ service: Service.Switch, characteristics: [ api.hap.On ] }],
+			definitions: [{ service: Service.Switch, characteristics: [ Characteristic.On ] }],
 		},		
 		{	// Sensors starts here
 			model: 'temperature',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 		// oregon protocol temperature sensor model
 		{
 			model: 'EA4C',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 		{	// special case with yr.no plugin in telldus
 			model: 'n\/a',
 			protocol: 'YR',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: 'temperaturehumidity',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '1A2D',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '010f-0c02-1003',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 		{
 			model: '019a-0003-000a',
 			definitions: [
-				{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] },
-				{ service: Service.HumiditySensor, characteristics: [ api.hap.CurrentRelativeHumidity ] }
+				{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] },
+				{ service: Service.HumiditySensor, characteristics: [ Characteristic.CurrentRelativeHumidity ] }
 			]
 		},
 		{
 			model: '0060-0015-0001',
-			definitions: [{ service: Service.TemperatureSensor, characteristics: [ api.hap.CurrentTemperature ] }],
+			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 	];
 
@@ -163,8 +162,7 @@ module.exports = function(homebridge) {
 			if (!accessToken) throw new Error('Please specify access_token in config');
 
 			api = new LocalApi({ host: ipAddress, accessToken });
-		}
-		else {
+		} else {
 			const key = config["public_key"];
 			const secret = config["private_key"];
 			const tokenKey = config["token"];
