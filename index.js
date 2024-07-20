@@ -512,8 +512,6 @@ module.exports = function(homebridge) {
 									callback(err);
 								});
 							}
-
-
 							// 16 hvis dimmer og < 100%, ellers 2
 							// kalle opp dimming i stedet?
 							
