@@ -50,9 +50,12 @@ const deviceTypes = {
 };
 
 module.exports = function(homebridge) {
-	const Service = homebridge.hap.Service;
-	const Characteristic = homebridge.hap.Characteristic;
-	let api;
+	// Compatibility with both Homebridge 1.x and 2.x
+	const api = homebridge ? (homebridge.hap ? homebridge.hap : homebridge.api.hap) : undefined;
+	
+	const Service = api ? api.Service : homebridge.hap.Service;
+	const Characteristic = api ? api.Characteristic : homebridge.hap.Characteristic;
+	
 	let isLocal;
 
 	const modelDefinitions = [
@@ -144,8 +147,10 @@ module.exports = function(homebridge) {
 			definitions: [{ service: Service.TemperatureSensor, characteristics: [ Characteristic.CurrentTemperature ] }],
 		},
 	];
-
-	homebridge.registerPlatform("homebridge-telldus-pn", "Telldus", TelldusPlatform);
+	
+	module.exports = (homebridge) => {
+		homebridge.registerPlatform('homebridge-telldus-pn', "Telldus", TelldusPlatform);
+	};
 
 	function TelldusPlatform(log, config) {
 		this.log = log;
@@ -295,18 +300,21 @@ module.exports = function(homebridge) {
 		},
 
 		getServices: function() {
-			// Accessory information
+			// Check if 'api' and 'hap' are available
+			const hap = this.api ? this.api.hap : undefined;
+			
+			// Access Service and Characteristic either from 'hap' or from the root (old versions)
+			const Service = hap ? hap.Service : global.Service;
+			const Characteristic = hap ? hap.Characteristic : global.Characteristic;
+
+			// Create accessory information service
 			const accessoryInformation = new Service.AccessoryInformation();
 
+			// Set characteristics
 			accessoryInformation
-				.setCharacteristic(api.hap.Manufacturer, this.manufacturer)
-				.setCharacteristic(api.hap.Model, this.model)
-				.setCharacteristic(api.hap.SerialNumber, this.id);
-
-				// this.log(`this ${JSON.stringify(this, null, 2)}`);
-
-				// this.log(`Device ${this.name}, model ${this.model}, devicteype ${this.device.deviceType}, methods ${this.device.methods}`);
-
+				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
+				.setCharacteristic(Characteristic.Model, this.model)
+				.setCharacteristic(Characteristic.SerialNumber, this.id);
 
 			// Model is missing for devices, find by devicetype and command combination (dimmer only for now)
 			const modelDeviceDimmer = modelDefinitions.find(d => {
@@ -356,13 +364,16 @@ module.exports = function(homebridge) {
 		},
 
 		configureServiceCharacteristics: function(definition) {
+			// Ensure compatibility between Homebridge 1.x and 2.x
+			const api = homebridge ? (homebridge.hap ? homebridge.hap : homebridge.api.hap) : undefined;
+			
 			const service = new definition.service(this.name);
 			const characteristics = definition.characteristics;
 
 			characteristics.forEach(characteristic => {
 				const cx = service.getCharacteristic(characteristic);
 
-				if (cx instanceof api.hap.SecuritySystemCurrentState) {
+				if (cx instanceof api.SecuritySystemCurrentState) {
 
 					cx.getValueFromDev = dev => {
 						if (dev.state == 2) return 3;
@@ -386,7 +397,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.SecuritySystemTargetState) {
+				if (cx instanceof api.SecuritySystemTargetState) {
 					cx.getValueFromDev = dev => {
 						if (dev.state == 2) return 3;
 						if (dev.state == 16 && dev.statevalue !== "unde") return parseInt(dev.statevalue);
@@ -408,7 +419,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.ContactSensorState) {
+				if (cx instanceof api.ContactSensorState) {
 					cx.getValueFromDev = dev => dev.state == commands.on ? commands.on : 0;
 
 					cx.on('get', (callback) => {
@@ -420,7 +431,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.CurrentTemperature) {
+				if (cx instanceof api.CurrentTemperature) {
 					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'temp') || [])[0] || {}).value);  // find value by name
 
 					cx.on('get', (callback) => {
@@ -443,7 +454,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.CurrentRelativeHumidity) {
+				if (cx instanceof api.CurrentRelativeHumidity) {
 					cx.getValueFromDev = dev => parseFloat(((dev.data.filter(a => a.name == 'humidity') || [])[0] || {}).value);  // find value by name
 					
 					cx.on('get', (callback) => {
@@ -467,7 +478,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.On) {
+				if (cx instanceof api.On) {
 					cx.getValueFromDev = dev => dev.state != commands.off;  // True/False retur
 
 					cx.value = cx.getValueFromDev(this.device);
@@ -478,10 +489,10 @@ module.exports = function(homebridge) {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
 							switch (cx.props.format) {
-							case api.hap.Formats.INT:
+							case api.Formats.INT:
 								callback(false, cx.getValueFromDev(cdevice) ? 1 : 0);
 								break;
-							case api.hap.Formats.BOOL:
+							case api.Formats.BOOL:
 								callback(false, cx.getValueFromDev(cdevice));
 								break;
 							}
@@ -522,7 +533,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.Brightness) {
+				if (cx instanceof api.Brightness) {
 					cx.getValueFromDev = dev => {
 
 						// this.log(`Getting value for dimmer ${dev.name} state: ${dev.state}, stateValue: ${dev.statevalue}`);
@@ -557,7 +568,7 @@ module.exports = function(homebridge) {
 					});
 				}
 
-				if (cx instanceof api.hap.CurrentPosition) {
+				if (cx instanceof api.CurrentPosition) {
 					cx.on('get', callback => bluebird.try(() => {
 						const resp = this.cachedValue || 0;
 						this.log(`Get CurrentPosition ${resp}`);
@@ -565,14 +576,14 @@ module.exports = function(homebridge) {
 					}).asCallback(callback));
 				}
 
-				if (cx instanceof api.hap.PositionState) {
+				if (cx instanceof api.PositionState) {
 					cx.on('get', callback => bluebird.try(() => {
 						this.log(`Get PositionState`);
 						return 2;
 					}).asCallback(callback));
 				}
 
-				if (cx instanceof api.hap.TargetPosition) {
+				if (cx instanceof api.TargetPosition) {
 					cx.on('get', callback => bluebird.try(() => {
 						const resp = this.cachedValue || 0;
 						this.log(`Get TargetPosition ${resp}`);
