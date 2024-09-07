@@ -1,7 +1,7 @@
 {
   "name": "@pontusnilsson/homebridge-telldus-pn",
   "description": "Telldus plugin for homebridge",
-  "version": "1.1.6",
+  "version": "2.0.1",
   "scripts": {
     "test": "exit 0",
     "lint": "eslint ."
